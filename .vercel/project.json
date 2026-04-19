@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_VmUwanvrf98cPT5ZhxVeTgOvED2E",
+  "orgId": "team_AygolvAO30HpZgQexyFydbeb",
+  "projectName": "plataforma-de-conexao-profissional",
+  "settings": {
+    "createdAt": 1776324207174,
+    "framework": "vite",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}

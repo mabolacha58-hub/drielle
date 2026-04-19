@@ -1,390 +1,555 @@
-import { useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  AlertCircle,
-  ArrowRight,
-  BriefcaseBusiness,
+  Mail,
+  Lock,
+  User as UserIcon,
   Eye,
   EyeOff,
-  type LucideIcon,
-  Lock,
-  Mail,
-  ShieldCheck,
-  Sparkles,
-  User,
-} from 'lucide-react';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { TabSwitcher } from '../components/ui/TabSwitcher';
-import { RoleSelector } from '../components/ui/RoleSelector';
-import { SocialButtons } from '../components/ui/SocialButtons';
-import { useAuthForm } from '../hooks/useAuthForm';
+  ArrowRight,
+  AlertCircle,
+  CheckCircle2,
+  Briefcase,
+  Building2,
+  Loader2,
+} from "lucide-react";
+import { supabase } from "../../lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 
-const GOLD = '#F5A623';
+type Role = "profissional" | "empresa";
+type Tab = "login" | "register";
 
-const loginHighlights = [
-  {
-    icon: BriefcaseBusiness,
-    title: 'Vagas e servicos num so lugar',
-    description: 'Encontre oportunidades, projetos e parceiros sem sair da plataforma.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Acesso rapido e seguro',
-    description: 'Entre, retome as conversas e acompanhe candidaturas em poucos segundos.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Perfil pensado para converter',
-    description: 'Mostre experiencia, portfolio e disponibilidade de forma mais convincente.',
-  },
-];
-
-function FieldShell({
-  label,
-  error,
-  icon: Icon,
-  rightElement,
-  children,
-  action,
-}: {
-  label: string;
-  error?: string;
-  icon: LucideIcon;
-  rightElement?: ReactNode;
-  children: ReactNode;
-  action?: ReactNode;
-}) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-3">
-        <label className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-600">
-          {label}
-        </label>
-        {action}
-      </div>
-
-      <div
-        className={[
-          'group flex items-center gap-3 rounded-2xl border bg-slate-50/80 px-4 transition-all',
-          error
-            ? 'border-red-300 bg-red-50/70 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-100'
-            : 'border-slate-200 focus-within:border-[#1A6BB5] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#1A6BB5]/10',
-        ].join(' ')}
-      >
-        <Icon size={18} className={error ? 'text-red-400' : 'text-slate-400'} />
-        <div className="min-w-0 flex-1">{children}</div>
-        {rightElement}
-      </div>
-
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-    </div>
-  );
-}
+const MESSAGES = {
+  invalidCredentials: "Email ou senha incorrectos. Verifique e tente novamente.",
+  emailAlreadyRegistered: "Este email já está registado. Faça login.",
+  signUpError: "Erro ao criar conta. Tente novamente.",
+  googleError: "Erro ao iniciar sessão com Google.",
+  forgotEmailRequired: "Insira o email primeiro.",
+  forgotError: "Não foi possível enviar o email.",
+  forgotSuccess: "Email de recuperação enviado! Verifique a sua caixa de entrada.",
+  accountCreated: "Conta criada! A redirecionar...",
+};
 
 export function Login() {
-  const {
-    tab,
-    loading,
-    error,
-    success,
-    loginForm,
-    registerForm,
-    handleLogin,
-    handleRegister,
-    resetPassword,
-    switchTab,
-    setError,
-  } = useAuthForm();
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<Tab>("login");
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [form, setForm] = useState({
+    nome: "",
+    email: "",
+    password: "",
+    role: "profissional" as Role,
+  });
 
-  const [showPassword, setShowPassword] = useState(false);
+  const updateForm = (key: keyof typeof form, value: string) => {
+    setError("");
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
-  const loginPassword = loginForm.register('password');
-  const registerPassword = registerForm.register('password');
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const { error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
+    if (error) {
+      setError(MESSAGES.invalidCredentials);
+      setLoading(false);
+      return;
+    }
+    navigate("/dashboard");
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: { nome: form.nome, role: form.role },
+      },
+    });
+    if (error) {
+      setError(
+        error.message.includes("already registered")
+          ? MESSAGES.emailAlreadyRegistered
+          : MESSAGES.signUpError
+      );
+      setLoading(false);
+      return;
+    }
+    if (data.user) {
+      await supabase.from("profiles").upsert(
+        {
+          id: data.user.id,
+          nome: form.nome,
+          email: form.email,
+          role: form.role,
+        },
+        { onConflict: "id" }
+      );
+    }
+    setSuccess(MESSAGES.accountCreated);
+    // Aguardar um pouco para o utilizador ver a mensagem de sucesso
+    setTimeout(() => navigate("/dashboard"), 800);
+  };
+
+  const handleGoogle = async () => {
+    setError("");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) setError(MESSAGES.googleError);
+  };
+
+  const handleForgot = async () => {
+    if (!form.email) {
+      setError(MESSAGES.forgotEmailRequired);
+      return;
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(form.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      setError(MESSAGES.forgotError);
+    } else {
+      setSuccess(MESSAGES.forgotSuccess);
+    }
+  };
+
+  const switchTab = (value: string) => {
+    setTab(value as Tab);
+    setError("");
+    setSuccess("");
+  };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#07111F] text-slate-900">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(91,163,224,0.18),transparent_28%),radial-gradient(circle_at_80%_20%,rgba(245,166,35,0.14),transparent_24%),linear-gradient(135deg,#08111d_0%,#0a2540_45%,#0e2c4f_100%)]" />
-      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:72px_72px]" />
-      <div className="absolute left-[-8rem] top-24 h-72 w-72 rounded-full bg-[#1A6BB5]/20 blur-3xl" />
-      <div className="absolute bottom-[-6rem] right-[-3rem] h-80 w-80 rounded-full bg-[#F5A623]/15 blur-3xl" />
+    <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+      {/* Left panel – brand */}
+      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0A2540] via-[#0D3B6E] to-[#1A6BB5] text-white p-12">
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-[#F5A623]/20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[#1A6BB5]/40 blur-3xl" />
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
-        <div className="grid w-full max-w-xl gap-6 mx-auto lg:max-w-none lg:grid-cols-[1.15fr_0.85fr]">
-          <section className="relative hidden overflow-hidden rounded-[32px] border border-white/10 bg-white/8 p-6 text-white shadow-[0_30px_100px_rgba(3,10,20,0.45)] backdrop-blur lg:block xl:p-8">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+        <div className="relative flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-white text-[#0A2540] font-bold text-xl shadow-lg">
+            D
+          </div>
+          <span className="text-xl font-semibold tracking-tight">Drielle.</span>
+        </div>
 
-            <Link to="/" className="inline-flex items-center gap-3 no-underline">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
-                <span className="font-['Sora'] text-xl font-extrabold text-white">D</span>
+        <div className="relative space-y-8">
+          <div className="space-y-4">
+            <h1 className="text-5xl font-bold leading-[1.05] tracking-tight">
+              A plataforma de
+              <br />
+              talento de
+              <span className="text-[#F5A623]"> Moçambique</span>.
+            </h1>
+            <p className="text-lg text-white/70 max-w-md">
+              Conectamos profissionais e empresas que constroem o futuro do
+              país.
+            </p>
+          </div>
+
+          <div className="flex gap-8 pt-4">
+            <Stat value="15.000+" label="Profissionais" />
+            <Stat value="2.400+" label="Empresas" />
+            <Stat value="98%" label="Satisfação" />
+          </div>
+
+          <figure className="relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm max-w-md">
+            <blockquote className="text-sm text-white/90 leading-relaxed">
+              "Em duas semanas contratei três engenheiros via Drielle. Nunca foi
+              tão simples encontrar talento qualificado em Maputo."
+            </blockquote>
+            <figcaption className="mt-4 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#F5A623] to-[#E8941A] grid place-items-center text-sm font-semibold">
+                AM
               </div>
-              <div>
-                <p className="font-['Sora'] text-xl font-extrabold tracking-tight text-white">
-                  Drielle<span style={{ color: GOLD }}>.</span>
-                </p>
-                <p className="text-sm text-white/60">Conexao profissional para Mozambique</p>
+              <div className="text-xs">
+                <div className="font-semibold">Aida Macuácua</div>
+                <div className="text-white/60">CEO, TechMoz</div>
               </div>
-            </Link>
+            </figcaption>
+          </figure>
+        </div>
 
-            <div className="mt-10 max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
-                <Sparkles size={14} />
-                rede com foco em resultado
-              </div>
+        <div className="relative flex items-center justify-between text-xs text-white/50">
+          <span>© {new Date().getFullYear()} Drielle</span>
+          <div className="flex gap-5">
+            <a href="/termos" className="hover:text-white transition">
+              Termos
+            </a>
+            <a href="/privacidade" className="hover:text-white transition">
+              Privacidade
+            </a>
+          </div>
+        </div>
+      </aside>
 
-              <h1 className="mt-5 font-['Sora'] text-[clamp(2.4rem,5vw,4.7rem)] font-extrabold leading-[0.95] tracking-[-0.05em] text-white">
-                {tab === 'login' ? 'Entre e volte ao fluxo de oportunidades.' : 'Crie a sua conta e comece com presenca forte.'}
-              </h1>
-
-              <p className="mt-5 max-w-xl text-base leading-7 text-white/72 sm:text-lg">
-                {tab === 'login'
-                  ? 'Acompanhe vagas, mensagens e propostas com uma interface mais clara, segura e focada em conversao.'
-                  : 'Cadastre-se em minutos, escolha o tipo de conta e publique o seu perfil com uma aparencia mais profissional.'}
-              </p>
+      {/* Right panel – form */}
+      <main className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
+        <div className="mx-auto w-full max-w-md">
+          {/* Mobile logo */}
+          <div className="lg:hidden mb-8 flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#0A2540] text-white font-bold">
+              D
             </div>
+            <span className="text-lg font-semibold">Drielle.</span>
+          </div>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {loginHighlights.map(({ icon: Icon, title, description }) => (
-                <div
-                  key={title}
-                  className="rounded-3xl border border-white/10 bg-white/10 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
-                >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F5A623]/18 text-[#FFD48A]">
-                    <Icon size={20} />
-                  </div>
-                  <h2 className="text-base font-semibold text-white">{title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-white/68">{description}</p>
-                </div>
-              ))}
-            </div>
+          <div className="mb-8 space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight">
+              {tab === "login" ? "Bem-vindo de volta" : "Criar a sua conta"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {tab === "login"
+                ? "Entre para aceder a milhares de oportunidades."
+                : "Junte-se gratuitamente e comece em menos de 1 minuto."}
+            </p>
+          </div>
 
-            <div className="mt-8 grid gap-4 rounded-[28px] border border-white/10 bg-slate-950/20 p-5 md:grid-cols-3">
-              <div>
-                <p className="text-3xl font-black text-white">15k+</p>
-                <p className="mt-1 text-sm text-white/65">profissionais e empresas em movimento</p>
-              </div>
-              <div>
-                <p className="text-3xl font-black text-white">24h</p>
-                <p className="mt-1 text-sm text-white/65">para retomar candidaturas e conversas pendentes</p>
-              </div>
-              <div>
-                <p className="text-3xl font-black text-white">1 lugar</p>
-                <p className="mt-1 text-sm text-white/65">para reputacao, oportunidades e vendas</p>
-              </div>
-            </div>
-          </section>
+          <Tabs value={tab} onValueChange={switchTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="login">Entrar</TabsTrigger>
+              <TabsTrigger value="register">Criar conta</TabsTrigger>
+            </TabsList>
 
-          <section className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95 p-4 shadow-[0_30px_80px_rgba(8,17,31,0.18)] backdrop-blur sm:rounded-[32px] sm:p-7">
-            <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#1A6BB5]/50 to-transparent" />
-
-            <div className="mb-6 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#1A6BB5]/70">
-                  {tab === 'login' ? 'Acesso rapido' : 'Novo cadastro'}
-                </p>
-                <h2 className="mt-2 font-['Sora'] text-[1.6rem] font-extrabold tracking-[-0.04em] text-slate-900 sm:text-[1.9rem]">
-                  {tab === 'login' ? 'Entrar na conta' : 'Abrir conta gratuita'}
-                </h2>
-                <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-                  {tab === 'login'
-                    ? 'Use o seu email para voltar ao dashboard, mensagens e oportunidades guardadas.'
-                    : 'Escolha o seu perfil e prepare-se para candidatar-se ou vender servicos com mais credibilidade.'}
-                </p>
-              </div>
-
-              <div className="hidden rounded-2xl border border-[#1A6BB5]/15 bg-[#E8F3FC] px-3 py-2 text-right sm:block">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#1A6BB5]/70">seguro</p>
-                <p className="mt-1 text-sm font-semibold text-[#0D3B6E]">Supabase Auth</p>
-              </div>
-            </div>
-
-            <TabSwitcher
-              tabs={[
-                { id: 'login', label: 'Entrar' },
-                { id: 'register', label: 'Criar conta' },
-              ]}
-              activeTab={tab}
-              onChange={switchTab}
-            />
-
-            {error ? (
-              <div className="mb-5 flex gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                <AlertCircle size={18} className="mt-0.5 shrink-0" />
+            {error && (
+              <div className="mb-4 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
-            ) : null}
-
-            {success ? (
-              <div className="mb-5 rounded-2xl border border-[#1A6BB5]/20 bg-[#E8F3FC] px-4 py-3 text-sm font-medium text-[#0D3B6E]">
-                {success}
+            )}
+            {success && (
+              <div className="mb-4 flex items-start gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2.5 text-sm text-green-700 dark:text-green-400">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>{success}</span>
               </div>
-            ) : null}
-
-            {tab === 'login' ? (
-              <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-5">
-                <FieldShell
-                  label="Email"
-                  icon={Mail}
-                  error={loginForm.formState.errors.email?.message}
-                >
-                  <Input
-                    type="email"
-                    placeholder="seu@email.com"
-                    className="h-14 border-0 bg-transparent px-0 text-[15px] shadow-none ring-0 focus-visible:border-0 focus-visible:ring-0"
-                    {...loginForm.register('email')}
-                  />
-                </FieldShell>
-
-                <FieldShell
-                  label="Senha"
-                  icon={Lock}
-                  error={loginForm.formState.errors.password?.message}
-                  action={
-                    <button
-                      type="button"
-                      onClick={() => resetPassword(loginForm.getValues('email'))}
-                      className="text-xs font-semibold text-[#1A6BB5] transition hover:text-[#0D3B6E]"
-                    >
-                      Recuperar acesso
-                    </button>
-                  }
-                  rightElement={
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((value) => !value)}
-                      className="text-slate-400 transition hover:text-slate-600"
-                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  }
-                >
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Digite a sua senha"
-                    className="h-14 border-0 bg-transparent px-0 text-[15px] shadow-none ring-0 focus-visible:border-0 focus-visible:ring-0"
-                    {...loginPassword}
-                  />
-                </FieldShell>
-
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="h-14 w-full rounded-2xl bg-[#1A6BB5] text-base font-semibold shadow-[0_18px_45px_rgba(26,107,181,0.32)] hover:bg-[#155892]"
-                  disabled={loading}
-                >
-                  {loading ? 'A entrar...' : 'Entrar na plataforma'}
-                  <ArrowRight size={18} />
-                </Button>
-              </form>
-            ) : (
-              <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-5">
-                <FieldShell
-                  label="Nome completo"
-                  icon={User}
-                  error={registerForm.formState.errors.nome?.message}
-                >
-                  <Input
-                    type="text"
-                    placeholder="Ex: Joao Silva"
-                    className="h-14 border-0 bg-transparent px-0 text-[15px] shadow-none ring-0 focus-visible:border-0 focus-visible:ring-0"
-                    {...registerForm.register('nome')}
-                  />
-                </FieldShell>
-
-                <RoleSelector
-                  value={registerForm.watch('role')}
-                  onChange={(role) => registerForm.setValue('role', role, { shouldValidate: true })}
-                />
-
-                <FieldShell
-                  label="Email"
-                  icon={Mail}
-                  error={registerForm.formState.errors.email?.message}
-                >
-                  <Input
-                    type="email"
-                    placeholder="seu@email.com"
-                    className="h-14 border-0 bg-transparent px-0 text-[15px] shadow-none ring-0 focus-visible:border-0 focus-visible:ring-0"
-                    {...registerForm.register('email')}
-                  />
-                </FieldShell>
-
-                <FieldShell
-                  label="Senha"
-                  icon={Lock}
-                  error={registerForm.formState.errors.password?.message}
-                  rightElement={
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((value) => !value)}
-                      className="text-slate-400 transition hover:text-slate-600"
-                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  }
-                >
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Minimo de 6 caracteres"
-                    className="h-14 border-0 bg-transparent px-0 text-[15px] shadow-none ring-0 focus-visible:border-0 focus-visible:ring-0"
-                    {...registerPassword}
-                  />
-                </FieldShell>
-
-                <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 rounded border-slate-300 accent-[#1A6BB5]"
-                    {...registerForm.register('terms')}
-                  />
-                  <span>
-                    Concordo com os{' '}
-                    <a href="/terms" className="font-semibold text-[#1A6BB5] no-underline hover:underline">
-                      Termos de Uso
-                    </a>{' '}
-                    e com a{' '}
-                    <a href="/privacy" className="font-semibold text-[#1A6BB5] no-underline hover:underline">
-                      Politica de Privacidade
-                    </a>
-                    .
-                  </span>
-                </label>
-
-                {registerForm.formState.errors.terms ? (
-                  <p className="text-sm text-red-600">{registerForm.formState.errors.terms.message}</p>
-                ) : null}
-
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="h-14 w-full rounded-2xl bg-[#1A6BB5] text-base font-semibold shadow-[0_18px_45px_rgba(26,107,181,0.32)] hover:bg-[#155892]"
-                  disabled={loading}
-                >
-                  {loading ? 'A criar conta...' : 'Criar conta gratuitamente'}
-                  <ArrowRight size={18} />
-                </Button>
-              </form>
             )}
 
-            <div className="mt-7">
-              <SocialButtons onError={setError} />
-            </div>
+            <TabsContent value="login" className="mt-0">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <Field
+                  id="login-email"
+                  label="Email"
+                  icon={<Mail className="h-4 w-4" />}
+                >
+                  <Input
+                    id="login-email"
+                    type="email"
+                    placeholder="voce@email.com"
+                    value={form.email}
+                    onChange={(e) => updateForm("email", e.target.value)}
+                    required
+                    className="pl-10 h-11"
+                  />
+                </Field>
 
-            <p className="mt-6 text-center text-sm leading-6 text-slate-500">
-              {tab === 'login' ? 'Nao tens conta?' : 'Ja tens conta?'}{' '}
-              <button
-                type="button"
-                onClick={() => switchTab(tab === 'login' ? 'register' : 'login')}
-                className="font-semibold text-[#1A6BB5] transition hover:text-[#0D3B6E]"
-              >
-                {tab === 'login' ? 'Criar agora' : 'Entrar'}
-              </button>
-            </p>
-          </section>
+                <Field
+                  id="login-pw"
+                  label="Senha"
+                  icon={<Lock className="h-4 w-4" />}
+                  trailing={
+                    <button
+                      type="button"
+                      onClick={handleForgot}
+                      className="text-xs font-semibold text-primary hover:underline"
+                    >
+                      Esqueceu?
+                    </button>
+                  }
+                >
+                  <Input
+                    id="login-pw"
+                    type={showPw ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={(e) => updateForm("password", e.target.value)}
+                    required
+                    className="pl-10 pr-10 h-11"
+                  />
+                  <PwToggle show={showPw} onClick={() => setShowPw(!showPw)} />
+                </Field>
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-11 text-sm font-semibold"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> A entrar...
+                    </>
+                  ) : (
+                    <>
+                      Entrar na conta <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="register" className="mt-0">
+              <form onSubmit={handleRegister} className="space-y-4">
+                <Field
+                  id="reg-nome"
+                  label="Nome completo"
+                  icon={<UserIcon className="h-4 w-4" />}
+                >
+                  <Input
+                    id="reg-nome"
+                    placeholder="O seu nome"
+                    value={form.nome}
+                    onChange={(e) => updateForm("nome", e.target.value)}
+                    required
+                    className="pl-10 h-11"
+                  />
+                </Field>
+
+                <div className="space-y-2">
+                  <Label>Tipo de conta</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <RoleCard
+                      active={form.role === "profissional"}
+                      onClick={() => updateForm("role", "profissional")}
+                      icon={<Briefcase className="h-5 w-5" />}
+                      title="Profissional"
+                      sub="Procuro emprego"
+                    />
+                    <RoleCard
+                      active={form.role === "empresa"}
+                      onClick={() => updateForm("role", "empresa")}
+                      icon={<Building2 className="h-5 w-5" />}
+                      title="Empresa"
+                      sub="Quero contratar"
+                    />
+                  </div>
+                </div>
+
+                <Field
+                  id="reg-email"
+                  label="Email"
+                  icon={<Mail className="h-4 w-4" />}
+                >
+                  <Input
+                    id="reg-email"
+                    type="email"
+                    placeholder="voce@email.com"
+                    value={form.email}
+                    onChange={(e) => updateForm("email", e.target.value)}
+                    required
+                    className="pl-10 h-11"
+                  />
+                </Field>
+
+                <Field
+                  id="reg-pw"
+                  label="Senha"
+                  icon={<Lock className="h-4 w-4" />}
+                  hint="Mínimo 6 caracteres"
+                >
+                  <Input
+                    id="reg-pw"
+                    type={showPw ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={(e) => updateForm("password", e.target.value)}
+                    required
+                    minLength={6}
+                    className="pl-10 pr-10 h-11"
+                  />
+                  <PwToggle show={showPw} onClick={() => setShowPw(!showPw)} />
+                </Field>
+
+                <p className="text-xs text-muted-foreground">
+                  Ao criar conta concorda com os{" "}
+                  <Link to="/termos" className="text-primary hover:underline">
+                    Termos
+                  </Link>{" "}
+                  e a{" "}
+                  <Link
+                    to="/privacidade"
+                    className="text-primary hover:underline"
+                  >
+                    Política de Privacidade
+                  </Link>
+                  .
+                </p>
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-11 text-sm font-semibold"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> A criar...
+                    </>
+                  ) : (
+                    <>
+                      Criar conta gratuitamente{" "}
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+
+          <div className="my-6 flex items-center gap-3">
+            <Separator className="flex-1" />
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
+              ou
+            </span>
+            <Separator className="flex-1" />
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoogle}
+            className="w-full h-11 text-sm font-medium"
+          >
+            <GoogleIcon /> Continuar com Google
+          </Button>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
+
+/* ---------- Subcomponentes ---------- */
+
+const Stat = ({ value, label }: { value: string; label: string }) => (
+  <div>
+    <div className="text-2xl font-bold">{value}</div>
+    <div className="text-xs text-white/60 uppercase tracking-wider mt-1">
+      {label}
+    </div>
+  </div>
+);
+
+const Field = ({
+  id,
+  label,
+  icon,
+  hint,
+  trailing,
+  children,
+}: {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  hint?: string;
+  trailing?: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <div className="space-y-1.5">
+    <div className="flex items-center justify-between">
+      <Label htmlFor={id} className="text-sm font-medium">
+        {label}
+      </Label>
+      {trailing}
+    </div>
+    <div className="relative">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+        {icon}
+      </span>
+      {children}
+    </div>
+    {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+  </div>
+);
+
+const PwToggle = ({ show, onClick }: { show: boolean; onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+    aria-label={show ? "Ocultar senha" : "Mostrar senha"}
+  >
+    {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+  </button>
+);
+
+const RoleCard = ({
+  active,
+  onClick,
+  icon,
+  title,
+  sub,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  title: string;
+  sub: string;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`flex flex-col items-start gap-2 rounded-xl border-2 p-3 text-left transition ${
+      active
+        ? "border-primary bg-primary/5"
+        : "border-border bg-card hover:border-primary/40"
+    }`}
+  >
+    <span
+      className={`grid h-8 w-8 place-items-center rounded-lg ${
+        active
+          ? "bg-primary text-primary-foreground"
+          : "bg-muted text-muted-foreground"
+      }`}
+    >
+      {icon}
+    </span>
+    <div>
+      <div className="text-sm font-semibold">{title}</div>
+      <div className="text-xs text-muted-foreground">{sub}</div>
+    </div>
+  </button>
+);
+
+const GoogleIcon = () => (
+  <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.99.66-2.25 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.11a6.6 6.6 0 0 1 0-4.22V7.05H2.18a11 11 0 0 0 0 9.9l3.66-2.84z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.05l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"
+    />
+  </svg>
+);
+
