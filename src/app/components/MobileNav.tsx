@@ -1,12 +1,23 @@
 import { Link, useLocation } from "react-router";
 import { Home, Briefcase, MessageCircle, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
 
 const B = "#1A6BB5";
 
 export function MobileNav() {
   const location = useLocation();
   const { user, profile } = useAuth();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  if (!isMobile) return null;
 
   const active = (p: string) =>
     p === "/" ? location.pathname === "/" : location.pathname.startsWith(p);
@@ -25,139 +36,124 @@ export function MobileNav() {
   ];
 
   return (
-    <>
-      <nav style={{
-        display: "none",
-        position: "fixed",
-        bottom: 0, left: 0, right: 0,
-        height: 60,
-        background: "white",
-        borderTop: "1.5px solid #E9ECEF",
-        zIndex: 300,
-        boxShadow: "0 -4px 20px rgba(0,0,0,0.08)",
-      }} className="mobile-bottom-nav">
+    <nav style={{
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 64,
+      background: "white",
+      borderTop: "1.5px solid #E9ECEF",
+      zIndex: 9999,
+      boxShadow: "0 -4px 20px rgba(0,0,0,0.10)",
+      display: "flex",
+      alignItems: "stretch",
+    }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-around",
+        width: "100%",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}>
 
-        {/* Inner container — perfectly centred */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-around",
-          height: "100%",
-          paddingBottom: "env(safe-area-inset-bottom)",
-          maxWidth: 500,
-          margin: "0 auto",
-          width: "100%",
-        }}>
-
-          {items.map(({ to, icon: Icon, label }) => {
-            const isActive = active(to);
-            return (
-              <Link key={to} to={to} style={{ textDecoration: "none", flex: 1 }}>
-                <div style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 3,
-                  padding: "6px 0",
-                }}>
-                  <div style={{
-                    width: 44,
-                    height: 28,
-                    borderRadius: 14,
-                    background: isActive ? "#E8F3FC" : "transparent",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transition: "background 0.15s",
-                  }}>
-                    <Icon
-                      size={21}
-                      color={isActive ? B : "#ADB5BD"}
-                      strokeWidth={isActive ? 2.5 : 1.8}
-                    />
-                  </div>
-                  <span style={{
-                    fontSize: 10,
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? B : "#ADB5BD",
-                    fontFamily: "'DM Sans', sans-serif",
-                    lineHeight: 1,
-                  }}>{label}</span>
-                </div>
-              </Link>
-            );
-          })}
-
-          {/* Perfil */}
-          <Link to={profilePath} style={{ textDecoration: "none", flex: 1 }}>
-            <div style={{
+        {items.map(({ to, icon: Icon, label }) => {
+          const isActive = active(to);
+          return (
+            <Link key={to} to={to} style={{
+              textDecoration: "none",
+              flex: 1,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: 3,
+              gap: 4,
               padding: "6px 0",
+              cursor: "pointer",
             }}>
               <div style={{
-                width: 44,
-                height: 28,
-                borderRadius: 14,
-                background: profileActive ? "#E8F3FC" : "transparent",
+                width: 40,
+                height: 26,
+                borderRadius: 13,
+                background: isActive ? "#E8F3FC" : "transparent",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transition: "background 0.15s",
               }}>
-                {user ? (
-                  <div style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: "50%",
-                    background: profileActive ? B : "#DEE2E6",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 9,
-                    fontWeight: 800,
-                    color: "white",
-                    fontFamily: "'Sora', sans-serif",
-                  }}>
-                    {initials}
-                  </div>
-                ) : (
-                  <User
-                    size={21}
-                    color={profileActive ? B : "#ADB5BD"}
-                    strokeWidth={profileActive ? 2.5 : 1.8}
-                  />
-                )}
+                <Icon
+                  size={20}
+                  color={isActive ? B : "#9CA3AF"}
+                  strokeWidth={isActive ? 2.5 : 1.8}
+                />
               </div>
               <span style={{
                 fontSize: 10,
-                fontWeight: profileActive ? 700 : 500,
-                color: profileActive ? B : "#ADB5BD",
+                fontWeight: isActive ? 700 : 400,
+                color: isActive ? B : "#9CA3AF",
                 fontFamily: "'DM Sans', sans-serif",
-                lineHeight: 1,
-              }}>Perfil</span>
-            </div>
-          </Link>
+              }}>
+                {label}
+              </span>
+            </Link>
+          );
+        })}
 
-        </div>
-      </nav>
+        {/* Perfil */}
+        <Link to={profilePath} style={{
+          textDecoration: "none",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 4,
+          padding: "6px 0",
+          cursor: "pointer",
+        }}>
+          <div style={{
+            width: 40,
+            height: 26,
+            borderRadius: 13,
+            background: profileActive ? "#E8F3FC" : "transparent",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            {user ? (
+              <div style={{
+                width: 22,
+                height: 22,
+                borderRadius: "50%",
+                background: profileActive ? B : "#DEE2E6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 8,
+                fontWeight: 800,
+                color: "white",
+                fontFamily: "'Sora', sans-serif",
+              }}>
+                {initials}
+              </div>
+            ) : (
+              <User
+                size={20}
+                color={profileActive ? B : "#9CA3AF"}
+                strokeWidth={profileActive ? 2.5 : 1.8}
+              />
+            )}
+          </div>
+          <span style={{
+            fontSize: 10,
+            fontWeight: profileActive ? 700 : 400,
+            color: profileActive ? B : "#9CA3AF",
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            Perfil
+          </span>
+        </Link>
 
-      <style>{`
-        @media (max-width: 640px) {
-          .mobile-bottom-nav {
-            display: flex !important;
-          }
-        }
-        @media (min-width: 641px) {
-          .mobile-bottom-nav {
-            display: none !important;
-          }
-        }
-      `}</style>
-    </>
+      </div>
+    </nav>
   );
 }

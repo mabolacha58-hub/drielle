@@ -62,8 +62,23 @@ function useOnClickOutside(ref: React.RefObject<HTMLElement>, handler: () => voi
 }
 
 export function Layout() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  // Verificar se estamos dentro do contexto do router
+  let location, navigate;
+  try {
+    location = useLocation();
+    navigate = useNavigate();
+  } catch (error) {
+    // Se não estamos no contexto do router, renderizar apenas o conteúdo básico
+    console.warn("Layout: Router hooks must be used within a Router context");
+    return (
+      <div style={{ minHeight: "100vh", background: "#F4F6F9", fontFamily: "'DM Sans', sans-serif" }}>
+        <main style={{ minHeight: "100vh" }}>
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
+
   const { profile, user, signOut } = useAuth();
   const isMobile = useMediaQuery("(max-width: 640px)");
 
