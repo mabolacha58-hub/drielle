@@ -5,18 +5,8 @@ import { useEffect, useState } from "react";
 
 const B = "#1A6BB5";
 
-export function MobileNav() {
-  // Verificar se estamos dentro do contexto do router
-  let location;
-  try {
-    location = useLocation();
-  } catch (error) {
-    // Se não estamos no contexto do router, não renderizar
-    console.warn("MobileNav: useLocation must be used within a Router context");
-    return null;
-  }
-
-  const { user, profile } = useAuth();
+// Hook personalizado para detectar mobile
+function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -26,21 +16,30 @@ export function MobileNav() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  return isMobile;
+}
+
+export function MobileNav() {
+  const location = useLocation(); // Agora assume-se que está dentro do router
+  const { user, profile } = useAuth();
+  const isMobile = useIsMobile();
+
+  // Durante a hidratação, pode ser false inicialmente; não retornamos null para evitar flash
   if (!isMobile) return null;
 
   const active = (p: string) =>
     p === "/" ? location.pathname === "/" : location.pathname.startsWith(p);
 
   const initials = profile?.nome
-    ? profile.nome.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()
+    ? profile.nome.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()
     : user?.email?.[0]?.toUpperCase() || "U";
 
   const profilePath = user ? "/perfil/1" : "/login";
   const profileActive = location.pathname.startsWith("/perfil") || location.pathname === "/login";
 
   const items = [
-    { to: "/",          icon: Home,          label: "Início" },
-    { to: "/vagas",     icon: Briefcase,     label: "Vagas" },
+    { to: "/", icon: Home, label: "Início" },
+    { to: "/vagas", icon: Briefcase, label: "Vagas" },
     { to: "/mensagens", icon: MessageCircle, label: "Chat" },
   ];
 
@@ -65,7 +64,6 @@ export function MobileNav() {
         width: "100%",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}>
-
         {items.map(({ to, icon: Icon, label }) => {
           const isActive = active(to);
           return (
@@ -107,7 +105,7 @@ export function MobileNav() {
           );
         })}
 
-        {/* Perfil */}
+        {/* Botão Perfil */}
         <Link to={profilePath} style={{
           textDecoration: "none",
           flex: 1,
@@ -161,7 +159,6 @@ export function MobileNav() {
             Perfil
           </span>
         </Link>
-
       </div>
     </nav>
   );
