@@ -6,12 +6,21 @@ import { useEffect, useState } from "react";
 const B = "#1A6BB5";
 
 export function MobileNav() {
-  const location = useLocation();
+  // Verificar se estamos dentro do contexto do router
+  let location;
+  try {
+    location = useLocation();
+  } catch (error) {
+    // Se não estamos no contexto do router, não renderizar
+    console.warn("MobileNav: useLocation must be used within a Router context");
+    return null;
+  }
+
   const { user, profile } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768);
+    const check = () => setIsMobile(window.innerWidth <= 640);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
