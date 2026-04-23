@@ -1,142 +1,163 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  Home,
-  Briefcase,
-  ShoppingBag,
-  MessageCircle,
-  User,
-  Rss,
-  Menu,
-  LayoutDashboard,
-  X,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router";
+import { Home, Briefcase, MessageCircle, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const B = "#1A6BB5";
-const BL = "#E8F3FC";
-
-const PRIMARY_NAV = [
-  { to: "/", icon: Home, label: "Inicio" },
-  { to: "/vagas", icon: Briefcase, label: "Vagas" },
-  { to: "/feed", icon: Rss, label: "Feed" },
-];
-
-const MORE_NAV = [
-  { to: "/marketplace", icon: ShoppingBag, label: "Mercado" },
-  { to: "/mensagens", icon: MessageCircle, label: "Chat" },
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-];
 
 export function MobileNav() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [moreOpen, setMoreOpen] = useState(false);
+  const { user, profile } = useAuth();
 
-  const active = (path: string) =>
-    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+  const active = (p: string) =>
+    p === "/" ? location.pathname === "/" : location.pathname.startsWith(p);
 
-  useEffect(() => {
-    setMoreOpen(false);
-  }, [location.pathname]);
+  const initials = profile?.nome
+    ? profile.nome.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()
+    : user?.email?.[0]?.toUpperCase() || "U";
 
+  const profilePath = user ? "/perfil/1" : "/login";
   const profileActive = location.pathname.startsWith("/perfil") || location.pathname === "/login";
-  const moreActive = MORE_NAV.some(({ to }) => active(to)) || profileActive;
-  const profilePath = user ? `/perfil/${user.id}` : "/login";
 
-  const handleNavigate = (to: string) => {
-    setMoreOpen(false);
-    navigate(to);
-  };
+  const items = [
+    { to: "/",          icon: Home,          label: "Início" },
+    { to: "/vagas",     icon: Briefcase,     label: "Vagas" },
+    { to: "/mensagens", icon: MessageCircle, label: "Chat" },
+  ];
 
   return (
     <>
-      {moreOpen && (
-        <button
-          type="button"
-          className="mobile-nav-backdrop"
-          aria-label="Fechar menu"
-          onClick={() => setMoreOpen(false)}
-        />
-      )}
+      <nav style={{
+        display: "none",
+        position: "fixed",
+        bottom: 0, left: 0, right: 0,
+        height: 60,
+        background: "white",
+        borderTop: "1.5px solid #E9ECEF",
+        zIndex: 300,
+        boxShadow: "0 -4px 20px rgba(0,0,0,0.08)",
+      }} className="mobile-bottom-nav">
 
-      <nav className="mobile-bottom-nav">
-        <div className="mobile-bottom-nav-inner">
-          {PRIMARY_NAV.map(({ to, icon: Icon, label }) => (
-            <Link key={to} to={to} className={`mobile-nav-item ${active(to) ? "active" : ""}`}>
-              <div className="mobile-nav-icon-wrap">
-                <Icon size={20} strokeWidth={active(to) ? 2.4 : 1.9} />
+        {/* Inner container — perfectly centred */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-around",
+          height: "100%",
+          paddingBottom: "env(safe-area-inset-bottom)",
+          maxWidth: 500,
+          margin: "0 auto",
+          width: "100%",
+        }}>
+
+          {items.map(({ to, icon: Icon, label }) => {
+            const isActive = active(to);
+            return (
+              <Link key={to} to={to} style={{ textDecoration: "none", flex: 1 }}>
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 3,
+                  padding: "6px 0",
+                }}>
+                  <div style={{
+                    width: 44,
+                    height: 28,
+                    borderRadius: 14,
+                    background: isActive ? "#E8F3FC" : "transparent",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "background 0.15s",
+                  }}>
+                    <Icon
+                      size={21}
+                      color={isActive ? B : "#ADB5BD"}
+                      strokeWidth={isActive ? 2.5 : 1.8}
+                    />
+                  </div>
+                  <span style={{
+                    fontSize: 10,
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? B : "#ADB5BD",
+                    fontFamily: "'DM Sans', sans-serif",
+                    lineHeight: 1,
+                  }}>{label}</span>
+                </div>
+              </Link>
+            );
+          })}
+
+          {/* Perfil */}
+          <Link to={profilePath} style={{ textDecoration: "none", flex: 1 }}>
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 3,
+              padding: "6px 0",
+            }}>
+              <div style={{
+                width: 44,
+                height: 28,
+                borderRadius: 14,
+                background: profileActive ? "#E8F3FC" : "transparent",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "background 0.15s",
+              }}>
+                {user ? (
+                  <div style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    background: profileActive ? B : "#DEE2E6",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 9,
+                    fontWeight: 800,
+                    color: "white",
+                    fontFamily: "'Sora', sans-serif",
+                  }}>
+                    {initials}
+                  </div>
+                ) : (
+                  <User
+                    size={21}
+                    color={profileActive ? B : "#ADB5BD"}
+                    strokeWidth={profileActive ? 2.5 : 1.8}
+                  />
+                )}
               </div>
-              <span>{label}</span>
-            </Link>
-          ))}
-
-          <button
-            type="button"
-            className={`mobile-nav-item mobile-nav-trigger ${moreOpen || moreActive ? "active" : ""}`}
-            onClick={() => setMoreOpen((open) => !open)}
-            aria-label={moreOpen ? "Fechar mais opcoes" : "Abrir mais opcoes"}
-            aria-expanded={moreOpen}
-          >
-            <div className="mobile-nav-icon-wrap">
-              {moreOpen ? <X size={20} strokeWidth={2.2} /> : <Menu size={20} strokeWidth={2} />}
+              <span style={{
+                fontSize: 10,
+                fontWeight: profileActive ? 700 : 500,
+                color: profileActive ? B : "#ADB5BD",
+                fontFamily: "'DM Sans', sans-serif",
+                lineHeight: 1,
+              }}>Perfil</span>
             </div>
-            <span>Mais</span>
-          </button>
+          </Link>
+
         </div>
       </nav>
 
-      {moreOpen && (
-        <div className="mobile-more-sheet">
-          <div className="mobile-more-handle" />
-
-          <div className="mobile-more-header">
-            <div>
-              <div className="mobile-more-title">Mais opcoes</div>
-              <div className="mobile-more-subtitle">Navegacao organizada para o celular</div>
-            </div>
-            <button
-              type="button"
-              className="mobile-more-close"
-              onClick={() => setMoreOpen(false)}
-              aria-label="Fechar"
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          <div className="mobile-more-grid">
-            {MORE_NAV.map(({ to, icon: Icon, label }) => (
-              <button
-                key={to}
-                type="button"
-                className={`mobile-more-item ${active(to) ? "active" : ""}`}
-                onClick={() => handleNavigate(to)}
-              >
-                <div className="mobile-more-icon">
-                  <Icon size={18} />
-                </div>
-                <span>{label}</span>
-              </button>
-            ))}
-
-            <button
-              type="button"
-              className={`mobile-more-item ${profileActive ? "active" : ""}`}
-              onClick={() => handleNavigate(profilePath)}
-            >
-              <div
-                className="mobile-more-icon"
-                style={user ? { background: BL, color: B, fontSize: 12, fontWeight: 800 } : undefined}
-              >
-                {user ? (user.email || "U")[0].toUpperCase() : <User size={18} />}
-              </div>
-              <span>{user ? "Perfil" : "Entrar"}</span>
-            </button>
-          </div>
-        </div>
-      )}
+      <style>{`
+        @media (max-width: 640px) {
+          .mobile-bottom-nav {
+            display: flex !important;
+          }
+        }
+        @media (min-width: 641px) {
+          .mobile-bottom-nav {
+            display: none !important;
+          }
+        }
+      `}</style>
     </>
   );
 }

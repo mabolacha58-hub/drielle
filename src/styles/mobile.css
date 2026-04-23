@@ -42,6 +42,7 @@ body { overscroll-behavior-y: contain; }
 
 .mobile-bottom-nav-inner {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   height: 100%;
@@ -59,14 +60,17 @@ body { overscroll-behavior-y: contain; }
   cursor: pointer;
   transition: all 0.18s ease;
   text-decoration: none;
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .mobile-nav-trigger {
   border: none;
   background: transparent;
   font-family: inherit;
+
 }
 
 .mobile-nav-icon-wrap {
@@ -158,8 +162,9 @@ body { overscroll-behavior-y: contain; }
 
 .mobile-more-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
+  align-items: stretch;
 }
 
 .mobile-more-item {
@@ -177,6 +182,7 @@ body { overscroll-behavior-y: contain; }
   text-align: left;
   font: inherit;
   cursor: pointer;
+  min-height: 62px;
 }
 
 .mobile-more-item.active {

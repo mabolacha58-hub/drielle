@@ -116,6 +116,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.101.1
         version: 2.103.3
+      '@tanstack/react-query':
+        specifier: ^5.99.2
+        version: 5.99.2(react@18.3.1)
       canvas-confetti:
         specifier: 1.9.4
         version: 1.9.4
@@ -2282,6 +2285,14 @@ packages:
     resolution: {integrity: sha512-4pt0AMFDx7gzIrAOIYgYP0KCBuKWqyW8ayrdiLEjoJTT4pKTjrzG/e4uzWtTLDziC+66R9wbUqZBccJalSE5vQ==}
     peerDependencies:
       vite: 6.3.5
+
+  '@tanstack/query-core@5.99.2':
+    resolution: {integrity: sha512-1HunU0bXVsR1ZJMZbcOPE6VtaBJxsW809RE9xPe4Gz7MlB0GWwQvuTPhMoEmQ/hIzFKJ/DWAuttIe7BOaWx0tA==}
+
+  '@tanstack/react-query@5.99.2':
+    resolution: {integrity: sha512-vM91UEe45QUS9ED6OklsVL15i8qKcRqNwpWzPTVWvRPRSEgDudDgHpvyTjcdlwHcrKNa80T+xXYcchT2noPnZA==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
@@ -7292,6 +7303,13 @@ snapshots:
       '@tailwindcss/oxide': 4.1.12
       tailwindcss: 4.1.12
       vite: 6.3.5(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.30.1)(tsx@4.21.0)
+
+  '@tanstack/query-core@5.99.2': {}
+
+  '@tanstack/react-query@5.99.2(react@18.3.1)':
+    dependencies:
+      '@tanstack/query-core': 5.99.2
+      react: 18.3.1
 
   '@tootallnate/once@2.0.0': {}
 
