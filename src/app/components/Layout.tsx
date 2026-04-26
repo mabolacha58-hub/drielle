@@ -23,7 +23,7 @@ const BL = "#E8F3FC";
 const GOLD = "#F5A623";
 
 const NAV = [
-  { to: "/", label: "Inicio", icon: Home },
+  { to: "/", label: "Início", icon: Home },
   { to: "/feed", label: "Feed", icon: Rss },
   { to: "/vagas", label: "Vagas", icon: Briefcase },
   { to: "/marketplace", label: "Mercado", icon: ShoppingBag },
@@ -178,7 +178,7 @@ export function Layout() {
                   Drielle<span style={{ color: GOLD }}>.</span>
                 </div>
                 <div style={{ fontSize: 9, color: B, fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", lineHeight: 1 }}>
-                  Conexao Profissional
+                  Conexão Profissional
                 </div>
               </div>
             ) : (
@@ -305,7 +305,7 @@ export function Layout() {
                     {[
                       { icon: User, label: "O meu perfil", to: "/perfil/1" },
                       { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
-                      { icon: Settings, label: "Configuracoes", to: "#" },
+                      { icon: Settings, label: "Configurações", to: "#" },
                     ].map(({ icon: Icon, label, to }) => (
                       <Link key={label} to={to} onClick={() => setUserMenuOpen(false)} style={{ textDecoration: "none" }}>
                         <div
@@ -325,7 +325,7 @@ export function Layout() {
                         onMouseOver={(e) => (e.currentTarget as HTMLElement).style.background = "#FFF5F5"}
                         onMouseOut={(e) => (e.currentTarget as HTMLElement).style.background = "transparent"}
                       >
-                        <LogOut size={15} /> Terminar sessao
+                        <LogOut size={15} /> Terminar sessão
                       </div>
                     </div>
                   </div>
@@ -374,13 +374,13 @@ export function Layout() {
                   </span>
                 </div>
                 <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.7, maxWidth: 260 }}>
-                  A plataforma lider de conexao profissional em Mocambique.
+                  A plataforma líder de conexão profissional em Moçambique.
                 </p>
               </div>
 
               {[
                 { title: "Plataforma", links: [["Vagas", "/vagas"], ["Marketplace", "/marketplace"], ["Feed", "/feed"], ["Dashboard", "/dashboard"]] },
-                { title: "Empresa", links: [["Sobre Nos", "#"], ["Carreiras", "#"], ["Contacto", "#"]] },
+                { title: "Empresa", links: [["Sobre Nós", "#"], ["Carreiras", "#"], ["Contacto", "#"]] },
                 { title: "Legal", links: [["Privacidade", "#"], ["Termos", "#"], ["Cookies", "#"]] },
               ].map(({ title, links }) => (
                 <div key={title}>

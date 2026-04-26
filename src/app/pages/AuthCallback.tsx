@@ -19,7 +19,7 @@ export function AuthCallback() {
       if (!active) return
 
       if (error) {
-        setError('Nao foi possivel concluir o login social. Tente novamente.')
+        setError('Não foi possível concluir o login social. Tente novamente.')
         return
       }
 
@@ -59,7 +59,7 @@ export function AuthCallback() {
               </div>
               <h1 className="font-['Sora'] text-2xl font-extrabold">A concluir o login</h1>
               <p className="mt-3 text-sm leading-6 text-white/75">
-                Estamos a validar a tua sessao e a abrir o dashboard.
+                Estamos a validar a tua sessão e a abrir o dashboard.
               </p>
             </>
           )}

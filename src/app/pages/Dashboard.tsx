@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, Briefcase, Eye, MessageCircle, Star, ArrowUpRight, Plus, ArrowRight } from "lucide-react";
+import { TrendingUp, Briefcase, Eye, MessageCircle, Star, ArrowUpRight, Plus, ArrowRight, Users, Building2, ShoppingBag, Rss } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { getDashboardStats, getMyCandidaturas } from "../../lib/api";
+import { getDashboardStats, getMyCandidaturas, getPlatformStats } from "../../lib/api";
 
 const B = "#1A6BB5", BD = "#0D3B6E", BL = "#E8F3FC", GOLD = "#F5A623", GL = "#FEF3DC";
 
@@ -20,6 +20,15 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
+  const PLATFORM_KPIS = [
+    { label: "Utilizadores", value: String(platformStats.totalUsers), helper: `+${platformStats.newUsersLast30Days} nos últimos 30 dias`, icon: Users, bg: BL, color: B },
+    { label: "Empresas", value: String(platformStats.totalCompanies), helper: "Registos empresariais", icon: Building2, bg: "#E1F5EE", color: "#065F46" },
+    { label: "Vagas ativas", value: String(platformStats.activeJobs), helper: "Publicadas na plataforma", icon: Briefcase, bg: GL, color: "#92400E" },
+    { label: "Serviços ativos", value: String(platformStats.activeProducts), helper: "No marketplace", icon: ShoppingBag, bg: "#FCEBEB", color: "#A32D2D" },
+    { label: "Publicações", value: String(platformStats.totalPosts), helper: "Posts no feed", icon: Rss, bg: "#EEEDFE", color: "#534AB7" },
+    { label: "Mensagens", value: String(platformStats.totalMessages), helper: "Conversas trocadas", icon: MessageCircle, bg: "#FEF3DC", color: "#92400E" },
+  ];
+
   return (
     <div style={{ background: "white", border: "1px solid #E9ECEF", borderRadius: 8, padding: "8px 12px", fontSize: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
       <div style={{ color: "#6C757D", marginBottom: 3 }}>{label}</div>
@@ -29,8 +38,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function Dashboard() {
-  const { profile, user } = useAuth();
+  const { profile, user, isAdmin } = useAuth();
   const [stats, setStats] = useState({ vagasActivas: 0, totalCandidaturas: 0, mensagensNaoLidas: 0, candidaturasPorStatus: {} as Record<string, number> });
+  const [platformStats, setPlatformStats] = useState({ totalUsers: 0, newUsersLast30Days: 0, totalCompanies: 0, activeJobs: 0, activeProducts: 0, totalPosts: 0, totalMessages: 0 });
   const [candidaturas, setCandidaturas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,11 +51,15 @@ export function Dashboard() {
         const [s, c] = await Promise.all([getDashboardStats(user!.id), getMyCandidaturas(user!.id)]);
         setStats(s);
         setCandidaturas(c.slice(0, 5));
+        if (isAdmin) {
+          const globalStats = await getPlatformStats();
+          setPlatformStats(globalStats);
+        }
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     }
     load();
-  }, [user?.id]);
+  }, [user?.id, isAdmin]);
 
   const KPIS = [
     { label: "Visualizações", value: "136", change: "+32%", icon: Eye, bg: BL, color: B },
@@ -97,6 +111,30 @@ export function Dashboard() {
             </div>
           ))}
         </div>
+
+        {isAdmin && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, gap: 12, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 16, fontWeight: 700, color: "#0A2540" }}>Saúde da Plataforma</div>
+                <div style={{ fontSize: 12, color: "#6C757D" }}>Indicadores globais para perceber se a plataforma está a ganhar utilizadores e atividade.</div>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14 }}>
+              {PLATFORM_KPIS.map(({ label, value, helper, icon: Icon, bg, color }) => (
+                <div key={label} style={{ background: "white", border: "1px solid #E9ECEF", borderRadius: 14, padding: 18, boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+                  <div style={{ width: 42, height: 42, borderRadius: 11, background: bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                    <Icon size={20} color={color} />
+                  </div>
+                  <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 28, fontWeight: 800, color: "#0A2540", lineHeight: 1 }}>{loading ? "—" : value}</div>
+                  <div style={{ fontSize: 12, color: "#495057", marginTop: 6, fontWeight: 600 }}>{label}</div>
+                  <div style={{ fontSize: 11, color: "#6C757D", marginTop: 4 }}>{helper}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Chart + Status */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>

@@ -25,7 +25,7 @@ export function ResetPassword() {
     }
 
     if (password !== confirmPassword) {
-      setError('As senhas nao coincidem.')
+      setError('As senhas não coincidem.')
       return
     }
 
@@ -34,7 +34,7 @@ export function ResetPassword() {
     const { error } = await supabase.auth.updateUser({ password })
 
     if (error) {
-      setError('Nao foi possivel actualizar a senha. Tente abrir o link do email novamente.')
+      setError('Não foi possível actualizar a senha. Tente abrir o link do email novamente.')
       setSaving(false)
       return
     }
@@ -82,7 +82,7 @@ export function ResetPassword() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   className="h-14 w-full bg-transparent text-[15px] text-white outline-none"
-                  placeholder="Minimo de 6 caracteres"
+                  placeholder="Mínimo de 6 caracteres"
                 />
               </div>
             </label>

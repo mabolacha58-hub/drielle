@@ -17,6 +17,7 @@ export function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [ordered, setOrdered] = useState(false);
+  const [contactError, setContactError] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -25,8 +26,20 @@ export function ProductDetail() {
 
   function handleContact() {
     if (!user) { navigate("/login"); return; }
-    if (!product?.vendedor_id) return;
-    navigate(`/mensagens?com=${product.vendedor_id}&sobre=${encodeURIComponent(product.titulo)}`);
+
+    const sellerId = product?.vendedor_id || product?.profiles?.id;
+    if (!sellerId) {
+      setContactError("Não foi possível identificar o vendedor deste serviço.");
+      return;
+    }
+
+    if (sellerId === user.id) {
+      setContactError("Este serviço pertence à sua própria conta.");
+      return;
+    }
+
+    setContactError("");
+    navigate(`/mensagens?com=${sellerId}&sobre=${encodeURIComponent(product.titulo)}`);
   }
 
   if (loading) return (
@@ -150,6 +163,13 @@ export function ProductDetail() {
                 </div>
               ))}
             </div>
+
+            {contactError && (
+              <div style={{ display: "flex", gap: 8, alignItems: "flex-start", padding: "10px 12px", background: "#FCEBEB", borderRadius: 10, border: "1px solid #F5B5B5", color: "#A32D2D", fontSize: 12, marginBottom: 12 }}>
+                <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                <span>{contactError}</span>
+              </div>
+            )}
 
             {!ordered ? (
               <>

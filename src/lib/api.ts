@@ -1,5 +1,216 @@
 import { supabase } from './supabase'
 
+const DEMO_PROFILE = {
+  id: 'demo-profile',
+  nome: 'Conta Demo',
+  avatar_url: null,
+  localizacao: 'Maputo',
+}
+
+const DEMO_PRODUCTS = [
+  {
+    id: 'demo-product-1',
+    vendedor_id: 'demo-seller-1',
+    titulo: 'Lap Top em Promoção',
+    descricao: 'Notebook empresarial em promoção, ideal para escritório, estudo e operações comerciais. Inclui mochila, rato sem fio e apoio técnico inicial.',
+    categoria: 'Software',
+    preco: 28500,
+    dias_entrega: 2,
+    revisoes: 1,
+    rating: 4.8,
+    tags: ['Laptop', 'Promoção', 'Escritório'],
+    imagem_url: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900',
+    imagens_urls: ['https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900'],
+    created_at: '2026-04-20T10:00:00.000Z',
+    profiles: {
+      id: 'demo-seller-1',
+      nome: 'Tech Store Maputo',
+      avatar_url: null,
+      localizacao: 'Maputo',
+    },
+  },
+  {
+    id: 'demo-product-2',
+    vendedor_id: 'demo-seller-2',
+    titulo: 'Consultoria Fiscal para PME',
+    descricao: 'Sessão prática para organização tributária, fluxo documental e calendário fiscal para pequenas e médias empresas.',
+    categoria: 'Finanças',
+    preco: 9500,
+    dias_entrega: 3,
+    revisoes: 2,
+    rating: 4.7,
+    tags: ['Fiscal', 'PME', 'Consultoria'],
+    imagem_url: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=900',
+    imagens_urls: ['https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=900'],
+    created_at: '2026-04-18T08:30:00.000Z',
+    profiles: {
+      id: 'demo-seller-2',
+      nome: 'Moz Finance Advisory',
+      avatar_url: null,
+      localizacao: 'Beira',
+    },
+  },
+  {
+    id: 'demo-product-3',
+    vendedor_id: 'demo-seller-3',
+    titulo: 'Branding Completo para Novos Negócios',
+    descricao: 'Pacote com logo, paleta visual, templates de redes sociais e mini guia de marca para lançamento profissional.',
+    categoria: 'Design',
+    preco: 12000,
+    dias_entrega: 5,
+    revisoes: 4,
+    rating: 4.9,
+    tags: ['Branding', 'Logo', 'Social Media'],
+    imagem_url: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?w=900',
+    imagens_urls: ['https://images.unsplash.com/photo-1545239351-1141bd82e8a6?w=900'],
+    created_at: '2026-04-16T14:45:00.000Z',
+    profiles: {
+      id: 'demo-seller-3',
+      nome: 'Studio Criativo 258',
+      avatar_url: null,
+      localizacao: 'Nampula',
+    },
+  },
+]
+
+const DEMO_JOBS = [
+  {
+    id: 'demo-job-1',
+    empresa_id: 'demo-company-1',
+    titulo: 'Assistente Administrativo',
+    empresa_nome: 'Grupo Horizonte',
+    localizacao: 'Maputo',
+    tipo: 'Tempo Inteiro',
+    categoria: 'Administracao',
+    salario_min: 18000,
+    salario_max: 24000,
+    descricao: 'Estamos a reforçar a equipa administrativa com um perfil organizado, proactivo e com boa comunicação para suporte operacional diário.',
+    responsabilidades: ['Organizar documentos e expedientes', 'Acompanhar pagamentos e fornecedores', 'Apoiar a equipa comercial e operacional'],
+    requisitos: ['Experiencia previa em funcoes administrativas', 'Boa utilizacao de Excel e email profissional', 'Residencia em Maputo'],
+    beneficios: ['Subsídio de transporte', 'Formação interna', 'Ambiente estável'],
+    skills: ['Excel', 'Organizacao', 'Comunicacao'],
+    prazo: '2026-05-20',
+    created_at: '2026-04-21T09:00:00.000Z',
+    activa: true,
+    destaque: true,
+    profiles: {
+      ...DEMO_PROFILE,
+      nome: 'Grupo Horizonte',
+      localizacao: 'Maputo',
+    },
+  },
+  {
+    id: 'demo-job-2',
+    empresa_id: 'demo-company-2',
+    titulo: 'Técnico de Suporte Informático',
+    empresa_nome: 'Inova Tech',
+    localizacao: 'Beira',
+    tipo: 'Hibrido',
+    categoria: 'TI & Tecnologia',
+    salario_min: 25000,
+    salario_max: 35000,
+    descricao: 'O profissional será responsável por suporte aos utilizadores, manutenção de equipamentos e acompanhamento de incidentes internos.',
+    responsabilidades: ['Prestar suporte de primeiro nivel', 'Instalar software e equipamentos', 'Manter inventario de TI atualizado'],
+    requisitos: ['Conhecimentos de redes e hardware', 'Boa postura de atendimento', 'Capacidade de diagnostico rapido'],
+    beneficios: ['Seguro basico', 'Plano de carreira', 'Horario flexivel'],
+    skills: ['Helpdesk', 'Redes', 'Windows'],
+    prazo: '2026-05-18',
+    created_at: '2026-04-19T12:15:00.000Z',
+    activa: true,
+    destaque: false,
+    profiles: {
+      ...DEMO_PROFILE,
+      nome: 'Inova Tech',
+      localizacao: 'Beira',
+    },
+  },
+  {
+    id: 'demo-job-3',
+    empresa_id: 'demo-company-3',
+    titulo: 'Gestor de Marketing Digital',
+    empresa_nome: 'Mercado Central Media',
+    localizacao: 'Remoto',
+    tipo: 'Remoto',
+    categoria: 'Marketing',
+    salario_min: 30000,
+    salario_max: 42000,
+    descricao: 'Precisamos de um perfil estratégico para campanhas digitais, conteúdo comercial e análise de resultados de conversão.',
+    responsabilidades: ['Planear campanhas de captacao', 'Gerir redes sociais e anuncios', 'Produzir relatorios de performance'],
+    requisitos: ['Experiencia com Meta Ads e Google Ads', 'Boa escrita comercial', 'Capacidade analitica'],
+    beneficios: ['Modelo remoto', 'Bonus por metas', 'Orcamento para formacao'],
+    skills: ['Meta Ads', 'Google Ads', 'Copywriting'],
+    prazo: '2026-05-25',
+    created_at: '2026-04-17T16:00:00.000Z',
+    activa: true,
+    destaque: true,
+    profiles: {
+      ...DEMO_PROFILE,
+      nome: 'Mercado Central Media',
+      localizacao: 'Remoto',
+    },
+  },
+]
+
+function mergeWithDemo<T extends { id: string }>(realItems: T[], demoItems: T[], minimum: number) {
+  if (realItems.length >= minimum) return realItems
+  const realIds = new Set(realItems.map((item) => item.id))
+  const missing = demoItems.filter((item) => !realIds.has(item.id)).slice(0, minimum - realItems.length)
+  return [...realItems, ...missing]
+}
+
+function normalizeSearchTerm(value?: string) {
+  return (value || '').trim().toLowerCase()
+}
+
+function filterDemoJobs(filters?: {
+  search?: string
+  category?: string
+  location?: string
+  type?: string
+}) {
+  const term = normalizeSearchTerm(filters?.search)
+
+  return DEMO_JOBS.filter((job) => {
+    const matchesSearch =
+      !term ||
+      [job.titulo, job.empresa_nome, job.descricao, ...(job.skills || [])]
+        .join(' ')
+        .toLowerCase()
+        .includes(term)
+    const matchesCategory = !filters?.category || filters.category === 'Todas' || job.categoria === filters.category
+    const matchesLocation = !filters?.location || filters.location === 'Todas' || job.localizacao === filters.location
+    const matchesType = !filters?.type || filters.type === 'Todos' || job.tipo === filters.type
+
+    return matchesSearch && matchesCategory && matchesLocation && matchesType
+  })
+}
+
+function filterDemoProducts(filters?: {
+  search?: string
+  category?: string
+  sort?: string
+}) {
+  const term = normalizeSearchTerm(filters?.search)
+
+  const filtered = DEMO_PRODUCTS.filter((product) => {
+    const matchesSearch =
+      !term ||
+      [product.titulo, product.descricao, product.categoria, product.profiles?.nome, ...(product.tags || [])]
+        .join(' ')
+        .toLowerCase()
+        .includes(term)
+    const matchesCategory = !filters?.category || filters.category === 'Todos' || product.categoria === filters.category
+
+    return matchesSearch && matchesCategory
+  })
+
+  return filtered.sort((left, right) => {
+    if (filters?.sort === 'Menor preÃ§o') return (left.preco || 0) - (right.preco || 0)
+    if (filters?.sort === 'Maior preÃ§o') return (right.preco || 0) - (left.preco || 0)
+    return new Date(right.created_at || 0).getTime() - new Date(left.created_at || 0).getTime()
+  })
+}
+
 function normalizeImageUrls(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.filter((item): item is string => typeof item === 'string' && item.length > 0)
@@ -64,11 +275,17 @@ export async function getVagas(filters?: {
   }
 
   const { data, error } = await query
-  if (error) throw error
-  return data || []
+  if (error) {
+    return filterDemoJobs(filters)
+  }
+
+  return mergeWithDemo(data || [], filterDemoJobs(filters), 6)
 }
 
 export async function getVagaById(id: string) {
+  const demoJob = DEMO_JOBS.find((job) => job.id === id)
+  if (demoJob) return demoJob
+
   const { data, error } = await supabase
     .from('vagas')
     .select(`*, profiles(id, nome, avatar_url, website, telefone, localizacao)`)
@@ -213,11 +430,17 @@ export async function getProdutos(filters?: {
   }
 
   const { data, error } = await query
-  if (error) throw error
-  return (data || []).map(normalizeProduto)
+  if (error) {
+    return filterDemoProducts(filters).map(normalizeProduto)
+  }
+
+  return mergeWithDemo((data || []).map(normalizeProduto), filterDemoProducts(filters).map(normalizeProduto), 6)
 }
 
 export async function getProdutoById(id: string) {
+  const demoProduct = DEMO_PRODUCTS.find((product) => product.id === id)
+  if (demoProduct) return normalizeProduto(demoProduct)
+
   const { data, error } = await supabase
     .from('produtos')
     .select(`*, profiles(id, nome, avatar_url, localizacao, created_at)`)
@@ -383,5 +606,32 @@ export async function getDashboardStats(user_id: string) {
       acc[c.status] = (acc[c.status] || 0) + 1
       return acc
     }, {}),
+  }
+}
+
+export async function getPlatformStats() {
+  const now = new Date()
+  const last30Days = new Date(now)
+  last30Days.setDate(now.getDate() - 30)
+  const recentIso = last30Days.toISOString()
+
+  const [profiles, newProfiles, companies, activeJobs, activeProducts, posts, messages] = await Promise.all([
+    supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', recentIso),
+    supabase.from('companies').select('id', { count: 'exact', head: true }),
+    supabase.from('vagas').select('id', { count: 'exact', head: true }).eq('activa', true),
+    supabase.from('produtos').select('id', { count: 'exact', head: true }).eq('activo', true),
+    supabase.from('posts').select('id', { count: 'exact', head: true }),
+    supabase.from('mensagens').select('id', { count: 'exact', head: true }),
+  ])
+
+  return {
+    totalUsers: profiles.count || 0,
+    newUsersLast30Days: newProfiles.count || 0,
+    totalCompanies: companies.count || 0,
+    activeJobs: activeJobs.count || 0,
+    activeProducts: activeProducts.count || 0,
+    totalPosts: posts.count || 0,
+    totalMessages: messages.count || 0,
   }
 }

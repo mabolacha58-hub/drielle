@@ -1,30 +1,42 @@
-import { Link, useLocation } from "react-router";
+import { Link, useLocation } from "react-router-dom";
 import { Home, Briefcase, MessageCircle, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 
 const B = "#1A6BB5";
 
-// Hook personalizado para detectar mobile
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+// Hook personalizado para detectar mobile usando media query (evita SSR issues)
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.matchMedia(query).matches;
+    }
+    return false;
+  });
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 640);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+    const media = window.matchMedia(query);
+    setMatches(media.matches);
+    
+    const listener = (e: MediaQueryListEvent) => {
+      setMatches(e.matches);
+    };
+    
+    media.addEventListener("change", listener);
+    return () => {
+      media.removeEventListener("change", listener);
+    };
+  }, [query]);
 
-  return isMobile;
+  return matches;
 }
 
 export function MobileNav() {
-  const location = useLocation(); // Agora assume-se que está dentro do router
+  const location = useLocation();
   const { user, profile } = useAuth();
-  const isMobile = useIsMobile();
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
-  // Durante a hidratação, pode ser false inicialmente; não retornamos null para evitar flash
+  // Não renderizar se não for mobile
   if (!isMobile) return null;
 
   const active = (p: string) =>
