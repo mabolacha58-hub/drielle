@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, Briefcase, Eye, MessageCircle, Star, ArrowUpRight, Plus, ArrowRight, Users, Building2, ShoppingBag, Rss } from "lucide-react";
+import { TrendingUp, Briefcase, Eye, MessageCircle, Star, ArrowUpRight, Plus, ArrowRight, Trash2, ShoppingBag, MapPin } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { getDashboardStats, getMyCandidaturas, getPlatformStats } from "../../lib/api";
+import { getDashboardStats, getMyCandidaturas, deleteVaga, deleteProduto } from "../../lib/api";
+import { supabase } from "../../lib/supabase";
 
 const B = "#1A6BB5", BD = "#0D3B6E", BL = "#E8F3FC", GOLD = "#F5A623", GL = "#FEF3DC";
 
@@ -20,28 +21,22 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
-  const PLATFORM_KPIS = [
-    { label: "Utilizadores", value: String(platformStats.totalUsers), helper: `+${platformStats.newUsersLast30Days} nos últimos 30 dias`, icon: Users, bg: BL, color: B },
-    { label: "Empresas", value: String(platformStats.totalCompanies), helper: "Registos empresariais", icon: Building2, bg: "#E1F5EE", color: "#065F46" },
-    { label: "Vagas ativas", value: String(platformStats.activeJobs), helper: "Publicadas na plataforma", icon: Briefcase, bg: GL, color: "#92400E" },
-    { label: "Serviços ativos", value: String(platformStats.activeProducts), helper: "No marketplace", icon: ShoppingBag, bg: "#FCEBEB", color: "#A32D2D" },
-    { label: "Publicações", value: String(platformStats.totalPosts), helper: "Posts no feed", icon: Rss, bg: "#EEEDFE", color: "#534AB7" },
-    { label: "Mensagens", value: String(platformStats.totalMessages), helper: "Conversas trocadas", icon: MessageCircle, bg: "#FEF3DC", color: "#92400E" },
-  ];
-
   return (
     <div style={{ background: "white", border: "1px solid #E9ECEF", borderRadius: 8, padding: "8px 12px", fontSize: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
       <div style={{ color: "#6C757D", marginBottom: 3 }}>{label}</div>
       <div style={{ fontWeight: 700, color: "#0A2540" }}>{payload[0].value} visualizações</div>
     </div>
   );
-};
+}
+;
 
 export function Dashboard() {
-  const { profile, user, isAdmin } = useAuth();
+  const { profile, user } = useAuth();
   const [stats, setStats] = useState({ vagasActivas: 0, totalCandidaturas: 0, mensagensNaoLidas: 0, candidaturasPorStatus: {} as Record<string, number> });
-  const [platformStats, setPlatformStats] = useState({ totalUsers: 0, newUsersLast30Days: 0, totalCompanies: 0, activeJobs: 0, activeProducts: 0, totalPosts: 0, totalMessages: 0 });
   const [candidaturas, setCandidaturas] = useState<any[]>([]);
+  const [minhasVagas, setMinhasVagas] = useState<any[]>([]);
+  const [meusProdutos, setMeusProdutos] = useState<any[]>([]);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,15 +46,18 @@ export function Dashboard() {
         const [s, c] = await Promise.all([getDashboardStats(user!.id), getMyCandidaturas(user!.id)]);
         setStats(s);
         setCandidaturas(c.slice(0, 5));
-        if (isAdmin) {
-          const globalStats = await getPlatformStats();
-          setPlatformStats(globalStats);
-        }
+        // Carregar vagas e produtos do utilizador
+        const [{ data: vagas }, { data: produtos }] = await Promise.all([
+          supabase.from("vagas").select("*").eq("empresa_id", user!.id).order("created_at", { ascending: false }),
+          supabase.from("produtos").select("*").eq("vendedor_id", user!.id).order("created_at", { ascending: false }),
+        ]);
+        setMinhasVagas(vagas || []);
+        setMeusProdutos(produtos || []);
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     }
     load();
-  }, [user?.id, isAdmin]);
+  }, [user?.id]);
 
   const KPIS = [
     { label: "Visualizações", value: "136", change: "+32%", icon: Eye, bg: BL, color: B },
@@ -79,7 +77,7 @@ export function Dashboard() {
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Resumo da sua actividade na Drielle</p>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <Link to="/vagas" style={{ textDecoration: "none" }}>
+            <Link to="/publicar-vaga" style={{ textDecoration: "none" }}>
               <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 99, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
                 <Plus size={14} /> Publicar Vaga
               </button>
@@ -111,30 +109,6 @@ export function Dashboard() {
             </div>
           ))}
         </div>
-
-        {isAdmin && (
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, gap: 12, flexWrap: "wrap" }}>
-              <div>
-                <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 16, fontWeight: 700, color: "#0A2540" }}>Saúde da Plataforma</div>
-                <div style={{ fontSize: 12, color: "#6C757D" }}>Indicadores globais para perceber se a plataforma está a ganhar utilizadores e atividade.</div>
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14 }}>
-              {PLATFORM_KPIS.map(({ label, value, helper, icon: Icon, bg, color }) => (
-                <div key={label} style={{ background: "white", border: "1px solid #E9ECEF", borderRadius: 14, padding: 18, boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-                  <div style={{ width: 42, height: 42, borderRadius: 11, background: bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-                    <Icon size={20} color={color} />
-                  </div>
-                  <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 28, fontWeight: 800, color: "#0A2540", lineHeight: 1 }}>{loading ? "—" : value}</div>
-                  <div style={{ fontSize: 12, color: "#495057", marginTop: 6, fontWeight: 600 }}>{label}</div>
-                  <div style={{ fontSize: 11, color: "#6C757D", marginTop: 4 }}>{helper}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Chart + Status */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
@@ -228,6 +202,114 @@ export function Dashboard() {
           })}
         </div>
 
+        {/* Minhas Publicações */}
+        {(minhasVagas.length > 0 || meusProdutos.length > 0) && (
+          <div style={{ background: "white", border: "1px solid #E9ECEF", borderRadius: 14, padding: 20, marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 14, fontWeight: 700, color: "#0A2540", marginBottom: 16 }}>
+              As minhas Publicações
+            </div>
+
+            {/* Vagas */}
+            {minhasVagas.length > 0 && (
+              <div style={{ marginBottom: meusProdutos.length > 0 ? 16 : 0 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#6C757D", textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 10 }}>
+                  Vagas ({minhasVagas.length})
+                </div>
+                {minhasVagas.map((v, i) => (
+                  <div key={v.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < minhasVagas.length - 1 ? "1px solid #F1F3F5" : "none" }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 10, background: BL, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Briefcase size={16} color={B} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#0A2540", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{v.titulo}</div>
+                      <div style={{ fontSize: 11, color: "#6C757D", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                        <MapPin size={10} />{v.localizacao} · {v.tipo}
+                        {v.salario_min && <span style={{ marginLeft: 4, color: B, fontWeight: 600 }}>{v.salario_min?.toLocaleString("pt-MZ")} MZN</span>}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <Link to={`/vagas/${v.id}`} style={{ textDecoration: "none" }}>
+                        <button style={{ width: 30, height: 30, borderRadius: 7, background: BL, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Eye size={14} color={B} />
+                        </button>
+                      </Link>
+                      <button
+                        onClick={async () => {
+                          if (!confirm("Apagar esta vaga?")) return;
+                          setDeleteLoading(v.id);
+                          try {
+                            await deleteVaga(v.id);
+                            setMinhasVagas(prev => prev.filter(x => x.id !== v.id));
+                            setStats(s => ({ ...s, vagasActivas: Math.max(0, s.vagasActivas - 1) }));
+                          } catch (e) { console.error(e); }
+                          finally { setDeleteLoading(null); }
+                        }}
+                        disabled={deleteLoading === v.id}
+                        style={{ width: 30, height: 30, borderRadius: 7, background: "#FCEBEB", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >
+                        {deleteLoading === v.id
+                          ? <div style={{ width: 12, height: 12, border: "2px solid #E24B4A", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                          : <Trash2 size={14} color="#E24B4A" />
+                        }
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Produtos */}
+            {meusProdutos.length > 0 && (
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#6C757D", textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 10 }}>
+                  Serviços / Produtos ({meusProdutos.length})
+                </div>
+                {meusProdutos.map((p, i) => (
+                  <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < meusProdutos.length - 1 ? "1px solid #F1F3F5" : "none" }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 10, overflow: "hidden", flexShrink: 0 }}>
+                      {p.imagem_url
+                        ? <img src={p.imagem_url} alt={p.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        : <div style={{ width: "100%", height: "100%", background: "#FEF3DC", display: "flex", alignItems: "center", justifyContent: "center" }}><ShoppingBag size={16} color="#D97706" /></div>
+                      }
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#0A2540", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{p.titulo}</div>
+                      <div style={{ fontSize: 11, color: "#6C757D", marginTop: 2 }}>
+                        {p.categoria} · <span style={{ color: B, fontWeight: 700 }}>{p.preco?.toLocaleString("pt-MZ")} MZN</span>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <Link to={`/marketplace/${p.id}`} style={{ textDecoration: "none" }}>
+                        <button style={{ width: 30, height: 30, borderRadius: 7, background: "#FEF3DC", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Eye size={14} color="#D97706" />
+                        </button>
+                      </Link>
+                      <button
+                        onClick={async () => {
+                          if (!confirm("Apagar este serviço?")) return;
+                          setDeleteLoading(p.id);
+                          try {
+                            await deleteProduto(p.id);
+                            setMeusProdutos(prev => prev.filter(x => x.id !== p.id));
+                          } catch (e) { console.error(e); }
+                          finally { setDeleteLoading(null); }
+                        }}
+                        disabled={deleteLoading === p.id}
+                        style={{ width: 30, height: 30, borderRadius: 7, background: "#FCEBEB", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >
+                        {deleteLoading === p.id
+                          ? <div style={{ width: 12, height: 12, border: "2px solid #E24B4A", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                          : <Trash2 size={14} color="#E24B4A" />
+                        }
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Profile reminder */}
         <div style={{ padding: "16px 20px", background: BL, borderRadius: 14, border: `1px solid ${B}30`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -247,3 +329,4 @@ export function Dashboard() {
     </div>
   );
 }
+// @keyframes spin added via CSS
