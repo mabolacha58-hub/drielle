@@ -54,10 +54,13 @@ export function Admin() {
         supabase.from("produtos").select("id", { count: "exact" }),
         supabase.from("candidaturas").select("id", { count: "exact" }),
         supabase.from("mensagens").select("id", { count: "exact" }),
-        supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(50),
-        supabase.from("vagas").select("*, profiles(nome, email)").order("created_at", { ascending: false }).limit(50),
-        supabase.from("produtos").select("*, profiles(nome, email)").order("created_at", { ascending: false }).limit(50),
-        supabase.from("candidaturas").select("*, vagas(titulo, empresa_nome), profiles(nome, email)").order("created_at", { ascending: false }).limit(50),
+        supabase.from("profiles").select("id,nome,email,role,avatar_url,localizacao,created_at").order("created_at", { ascending: false }).limit(50),
+        supabase.from("vagas").select("id,titulo,empresa_nome,localizacao,tipo,created_at,profiles(nome,email)").order("created_at", { ascending: false }).limit(50),
+        supabase.from("produtos").select("id,titulo,categoria,preco,imagem_url,imagens_urls,created_at,profiles(nome,email)").order("created_at", { ascending: false }).limit(50),
+        supabase.from("candidaturas")
+          .select("*, vagas!candidaturas_vaga_id_fkey(titulo, empresa_nome), profiles(nome, email)")
+          .order("created_at", { ascending: false })
+          .limit(50),
       ]);
 
       setStats({ users: userCount || 0, vagas: vagaCount || 0, produtos: prodCount || 0, candidaturas: candCount || 0, mensagens: msgCount || 0 });
@@ -368,7 +371,7 @@ export function Admin() {
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
                       <tr style={{ background: "#F8F9FA" }}>
-                        {["Produto", "Categoria", "Preço", "Vendedor", "Data", "Acções"].map(h => (
+                        {["Produto", "Categoria", "Preço", "Imagens", "Vendedor", "Data", "Acções"].map(h => (
                           <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "#6C757D", textTransform: "uppercase", letterSpacing: "0.5px", whiteSpace: "nowrap" }}>{h}</th>
                         ))}
                       </tr>
@@ -395,6 +398,9 @@ export function Admin() {
                             <span style={{ fontSize: 11, padding: "3px 9px", borderRadius: 99, background: "#FEF3DC", color: "#92400E", fontWeight: 600 }}>{p.categoria}</span>
                           </td>
                           <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 700, color: B }}>{p.preco?.toLocaleString("pt-MZ")} MZN</td>
+                          <td style={{ padding: "12px 16px", fontSize: 12, color: "#6C757D" }}>
+                            {p.imagens_urls ? `${p.imagens_urls.length} imagem${p.imagens_urls.length !== 1 ? 's' : ''}` : '0 imagens'}
+                          </td>
                           <td style={{ padding: "12px 16px", fontSize: 13, color: "#6C757D" }}>{p.profiles?.nome || "—"}</td>
                           <td style={{ padding: "12px 16px", fontSize: 12, color: "#ADB5BD" }}>{new Date(p.created_at).toLocaleDateString("pt-PT")}</td>
                           <td style={{ padding: "12px 16px" }}>

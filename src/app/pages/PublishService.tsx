@@ -125,13 +125,18 @@ export function PublishService() {
         tags: form.tags,
         dias_entrega: parseInt(form.dias_entrega, 10),
         revisoes: parseInt(form.revisoes, 10),
-        imagens_urls,
+        imagens_urls: imagens_urls.length > 0 ? imagens_urls : null,
+        imagem_url: imagens_urls[0] || null,
         activo: true,
       });
 
       if (insertError) {
         throw insertError;
       }
+
+      // Notify marketplace to refresh
+      localStorage.setItem('productPublished', 'true');
+      window.dispatchEvent(new StorageEvent('storage', { key: 'productPublished', newValue: 'true' }));
 
       setSuccess(true);
     } catch (submitError: any) {
@@ -312,8 +317,9 @@ export function PublishService() {
                   style={inputStyle}
                   placeholder="Ex: 15000"
                   value={form.preco}
-                  onChange={(event) => setField("preco", event.target.value)}
+                  onChange={(event) => setField("preco", event.target.value.replace(/[^\d]/g, ''))}
                   required
+                  min="1"
                   onFocus={(event) => {
                     event.currentTarget.style.borderColor = B;
                   }}

@@ -112,6 +112,7 @@ export function Marketplace() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedSearch(search), 250);
@@ -132,7 +133,20 @@ export function Marketplace() {
     }
 
     load();
-  }, [category]);
+  }, [category, refreshKey]);
+
+  // Auto-refresh when a product is published
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'productPublished' && event.newValue === 'true') {
+        setRefreshKey(prev => prev + 1);
+        localStorage.removeItem('productPublished');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const filtered = useMemo(() => {
     const term = normalizeText(debouncedSearch.trim());
@@ -365,6 +379,25 @@ export function Marketplace() {
             >
               <Filter size={14} />
               Filtros
+            </button>
+
+            <button
+              onClick={() => setRefreshKey(prev => prev + 1)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 14px",
+                borderRadius: 999,
+                border: "1px solid rgba(255,255,255,0.24)",
+                background: "rgba(255,255,255,0.10)",
+                color: "white",
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              <RefreshCw size={14} />
+              Atualizar
             </button>
 
             {["Entrega rápida", "Melhor avaliação", "Preço equilibrado"].map((label) => (
@@ -784,6 +817,28 @@ function ProductCard({
           </div>
         )}
 
+        {/* Multiple images indicator */}
+        {product.imagens_urls && product.imagens_urls.length > 1 && (
+          <div
+            style={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              background: "rgba(0,0,0,0.7)",
+              color: "white",
+              fontSize: 10,
+              fontWeight: 700,
+              padding: "2px 6px",
+              borderRadius: 99,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            📷 {product.imagens_urls.length}
+          </div>
+        )}
+
         <div style={{ position: "absolute", left: 12, bottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
           {typeof product.rating === "number" && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 999, background: "rgba(255,255,255,0.92)", fontSize: 12, fontWeight: 700 }}>
@@ -910,12 +965,34 @@ function ProductListItem({
 
   return (
     <div className="marketplace-list-item" style={{ background: "white", border: "1px solid #E9ECEF", borderRadius: 18, padding: 16, display: "flex", gap: 16, boxShadow: "0 3px 10px rgba(13,59,110,0.04)" }}>
-      <div style={{ width: 92, height: 92, borderRadius: 16, overflow: "hidden", flexShrink: 0, background: `linear-gradient(135deg, ${color}22, ${color}50)` }}>
+      <div style={{ width: 92, height: 92, borderRadius: 16, overflow: "hidden", flexShrink: 0, background: `linear-gradient(135deg, ${color}22, ${color}50)`, position: "relative" }}>
         {product.imagens_urls?.[0] ? (
           <img src={product.imagens_urls[0]} alt={product.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontFamily: "'Sora', sans-serif", fontWeight: 800 }}>
             {initials}
+          </div>
+        )}
+
+        {/* Multiple images indicator */}
+        {product.imagens_urls && product.imagens_urls.length > 1 && (
+          <div
+            style={{
+              position: "absolute",
+              top: 4,
+              right: 4,
+              background: "rgba(0,0,0,0.7)",
+              color: "white",
+              fontSize: 9,
+              fontWeight: 700,
+              padding: "1px 4px",
+              borderRadius: 99,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            📷 {product.imagens_urls.length}
           </div>
         )}
       </div>

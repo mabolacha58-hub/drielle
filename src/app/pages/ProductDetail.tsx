@@ -18,6 +18,7 @@ export function ProductDetail() {
   const [liked, setLiked] = useState(false);
   const [ordered, setOrdered] = useState(false);
   const [contactError, setContactError] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -81,7 +82,9 @@ export function ProductDetail() {
           {/* Hero image */}
           <div style={{ background: "white", border: "1px solid #E9ECEF", borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
             <div style={{ height: 280, overflow: "hidden", position: "relative" }}>
-              {product.imagem_url ? (
+              {product.imagens_urls && product.imagens_urls.length > 0 ? (
+                <img src={product.imagens_urls[currentImageIndex]} alt={product.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : product.imagem_url ? (
                 <img src={product.imagem_url} alt={product.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
                 <div style={{ width: "100%", height: "100%", background: `linear-gradient(135deg,${color}15,${color}35)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -99,6 +102,27 @@ export function ProductDetail() {
                 </button>
               </div>
             </div>
+
+            {/* Image gallery */}
+            {product.imagens_urls && product.imagens_urls.length > 1 && (
+              <div style={{ padding: "16px 24px 0", borderTop: "1px solid #F1F3F5" }}>
+                <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8 }}>
+                  {product.imagens_urls.map((img: string, index: number) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      style={{
+                        width: 60, height: 60, borderRadius: 8, border: `2px solid ${index === currentImageIndex ? B : "#DEE2E6"}`,
+                        background: "white", cursor: "pointer", flexShrink: 0, overflow: "hidden", padding: 0
+                      }}
+                    >
+                      <img src={img} alt={`${product.titulo} ${index + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div style={{ padding: 24 }}>
               <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99, background: BL, color: B, textTransform: "uppercase" as const, letterSpacing: "0.3px" }}>{product.categoria}</span>
               <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: 24, fontWeight: 800, color: "#0A2540", margin: "12px 0 6px" }}>{product.titulo}</h1>

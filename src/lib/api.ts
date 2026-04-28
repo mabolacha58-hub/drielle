@@ -12,7 +12,7 @@ const DEMO_PRODUCTS = [
     id: 'demo-product-1',
     vendedor_id: 'demo-seller-1',
     titulo: 'Lap Top em Promoção',
-    descricao: 'Notebook empresarial em promoção, ideal para escritório, estudo e operações comerciais. Inclui mochila, rato sem fio e apoio técnico inicial.',
+    descricao: 'Notebook empresarial em promoção, ideal para escritório, estudo e operações comerciais.',
     categoria: 'Software',
     preco: 28500,
     dias_entrega: 2,
@@ -22,18 +22,14 @@ const DEMO_PRODUCTS = [
     imagem_url: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900',
     imagens_urls: ['https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900'],
     created_at: '2026-04-20T10:00:00.000Z',
-    profiles: {
-      id: 'demo-seller-1',
-      nome: 'Tech Store Maputo',
-      avatar_url: null,
-      localizacao: 'Maputo',
-    },
+    activo: true,
+    profiles: { id: 'demo-seller-1', nome: 'Tech Store Maputo', avatar_url: null, localizacao: 'Maputo' },
   },
   {
     id: 'demo-product-2',
     vendedor_id: 'demo-seller-2',
     titulo: 'Consultoria Fiscal para PME',
-    descricao: 'Sessão prática para organização tributária, fluxo documental e calendário fiscal para pequenas e médias empresas.',
+    descricao: 'Sessão prática para organização tributária e calendário fiscal para pequenas e médias empresas.',
     categoria: 'Finanças',
     preco: 9500,
     dias_entrega: 3,
@@ -43,18 +39,14 @@ const DEMO_PRODUCTS = [
     imagem_url: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=900',
     imagens_urls: ['https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=900'],
     created_at: '2026-04-18T08:30:00.000Z',
-    profiles: {
-      id: 'demo-seller-2',
-      nome: 'Moz Finance Advisory',
-      avatar_url: null,
-      localizacao: 'Beira',
-    },
+    activo: true,
+    profiles: { id: 'demo-seller-2', nome: 'Moz Finance Advisory', avatar_url: null, localizacao: 'Beira' },
   },
   {
     id: 'demo-product-3',
     vendedor_id: 'demo-seller-3',
     titulo: 'Branding Completo para Novos Negócios',
-    descricao: 'Pacote com logo, paleta visual, templates de redes sociais e mini guia de marca para lançamento profissional.',
+    descricao: 'Pacote com logo, paleta visual, templates de redes sociais e mini guia de marca.',
     categoria: 'Design',
     preco: 12000,
     dias_entrega: 5,
@@ -64,12 +56,8 @@ const DEMO_PRODUCTS = [
     imagem_url: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?w=900',
     imagens_urls: ['https://images.unsplash.com/photo-1545239351-1141bd82e8a6?w=900'],
     created_at: '2026-04-16T14:45:00.000Z',
-    profiles: {
-      id: 'demo-seller-3',
-      nome: 'Studio Criativo 258',
-      avatar_url: null,
-      localizacao: 'Nampula',
-    },
+    activo: true,
+    profiles: { id: 'demo-seller-3', nome: 'Studio Criativo 258', avatar_url: null, localizacao: 'Nampula' },
   },
 ]
 
@@ -84,20 +72,16 @@ const DEMO_JOBS = [
     categoria: 'Administracao',
     salario_min: 18000,
     salario_max: 24000,
-    descricao: 'Estamos a reforçar a equipa administrativa com um perfil organizado, proactivo e com boa comunicação para suporte operacional diário.',
-    responsabilidades: ['Organizar documentos e expedientes', 'Acompanhar pagamentos e fornecedores', 'Apoiar a equipa comercial e operacional'],
-    requisitos: ['Experiencia previa em funcoes administrativas', 'Boa utilizacao de Excel e email profissional', 'Residencia em Maputo'],
-    beneficios: ['Subsídio de transporte', 'Formação interna', 'Ambiente estável'],
-    skills: ['Excel', 'Organizacao', 'Comunicacao'],
+    descricao: 'Estamos a reforçar a equipa administrativa com um perfil organizado e proactivo.',
+    responsabilidades: ['Organizar documentos e expedientes', 'Acompanhar pagamentos e fornecedores'],
+    requisitos: ['Experiência prévia em funções administrativas', 'Boa utilização de Excel'],
+    beneficios: ['Subsídio de transporte', 'Formação interna'],
+    skills: ['Excel', 'Organização', 'Comunicação'],
     prazo: '2026-05-20',
     created_at: '2026-04-21T09:00:00.000Z',
     activa: true,
     destaque: true,
-    profiles: {
-      ...DEMO_PROFILE,
-      nome: 'Grupo Horizonte',
-      localizacao: 'Maputo',
-    },
+    profiles: { ...DEMO_PROFILE, nome: 'Grupo Horizonte' },
   },
   {
     id: 'demo-job-2',
@@ -109,20 +93,16 @@ const DEMO_JOBS = [
     categoria: 'TI & Tecnologia',
     salario_min: 25000,
     salario_max: 35000,
-    descricao: 'O profissional será responsável por suporte aos utilizadores, manutenção de equipamentos e acompanhamento de incidentes internos.',
-    responsabilidades: ['Prestar suporte de primeiro nivel', 'Instalar software e equipamentos', 'Manter inventario de TI atualizado'],
-    requisitos: ['Conhecimentos de redes e hardware', 'Boa postura de atendimento', 'Capacidade de diagnostico rapido'],
-    beneficios: ['Seguro basico', 'Plano de carreira', 'Horario flexivel'],
+    descricao: 'Responsável por suporte aos utilizadores e manutenção de equipamentos.',
+    responsabilidades: ['Prestar suporte de primeiro nível', 'Instalar software e equipamentos'],
+    requisitos: ['Conhecimentos de redes e hardware', 'Boa postura de atendimento'],
+    beneficios: ['Seguro básico', 'Plano de carreira'],
     skills: ['Helpdesk', 'Redes', 'Windows'],
     prazo: '2026-05-18',
     created_at: '2026-04-19T12:15:00.000Z',
     activa: true,
     destaque: false,
-    profiles: {
-      ...DEMO_PROFILE,
-      nome: 'Inova Tech',
-      localizacao: 'Beira',
-    },
+    profiles: { ...DEMO_PROFILE, nome: 'Inova Tech', localizacao: 'Beira' },
   },
   {
     id: 'demo-job-3',
@@ -134,20 +114,16 @@ const DEMO_JOBS = [
     categoria: 'Marketing',
     salario_min: 30000,
     salario_max: 42000,
-    descricao: 'Precisamos de um perfil estratégico para campanhas digitais, conteúdo comercial e análise de resultados de conversão.',
-    responsabilidades: ['Planear campanhas de captacao', 'Gerir redes sociais e anuncios', 'Produzir relatorios de performance'],
-    requisitos: ['Experiencia com Meta Ads e Google Ads', 'Boa escrita comercial', 'Capacidade analitica'],
-    beneficios: ['Modelo remoto', 'Bonus por metas', 'Orcamento para formacao'],
+    descricao: 'Perfil estratégico para campanhas digitais, conteúdo comercial e análise de resultados.',
+    responsabilidades: ['Planear campanhas de captação', 'Gerir redes sociais e anúncios'],
+    requisitos: ['Experiência com Meta Ads e Google Ads', 'Boa escrita comercial'],
+    beneficios: ['Modelo remoto', 'Bónus por metas'],
     skills: ['Meta Ads', 'Google Ads', 'Copywriting'],
     prazo: '2026-05-25',
     created_at: '2026-04-17T16:00:00.000Z',
     activa: true,
     destaque: true,
-    profiles: {
-      ...DEMO_PROFILE,
-      nome: 'Mercado Central Media',
-      localizacao: 'Remoto',
-    },
+    profiles: { ...DEMO_PROFILE, nome: 'Mercado Central Media', localizacao: 'Remoto' },
   },
 ]
 
@@ -162,124 +138,71 @@ function normalizeSearchTerm(value?: string) {
   return (value || '').trim().toLowerCase()
 }
 
-function filterDemoJobs(filters?: {
-  search?: string
-  category?: string
-  location?: string
-  type?: string
-}) {
+function filterDemoJobs(filters?: { search?: string; category?: string; location?: string; type?: string }) {
   const term = normalizeSearchTerm(filters?.search)
-
   return DEMO_JOBS.filter((job) => {
-    const matchesSearch =
-      !term ||
-      [job.titulo, job.empresa_nome, job.descricao, ...(job.skills || [])]
-        .join(' ')
-        .toLowerCase()
-        .includes(term)
+    const matchesSearch = !term || [job.titulo, job.empresa_nome, job.descricao, ...(job.skills || [])].join(' ').toLowerCase().includes(term)
     const matchesCategory = !filters?.category || filters.category === 'Todas' || job.categoria === filters.category
     const matchesLocation = !filters?.location || filters.location === 'Todas' || job.localizacao === filters.location
     const matchesType = !filters?.type || filters.type === 'Todos' || job.tipo === filters.type
-
     return matchesSearch && matchesCategory && matchesLocation && matchesType
   })
 }
 
-function filterDemoProducts(filters?: {
-  search?: string
-  category?: string
-  sort?: string
-}) {
+function filterDemoProducts(filters?: { search?: string; category?: string; sort?: string }) {
   const term = normalizeSearchTerm(filters?.search)
-
   const filtered = DEMO_PRODUCTS.filter((product) => {
-    const matchesSearch =
-      !term ||
-      [product.titulo, product.descricao, product.categoria, product.profiles?.nome, ...(product.tags || [])]
-        .join(' ')
-        .toLowerCase()
-        .includes(term)
+    const matchesSearch = !term || [product.titulo, product.descricao, product.categoria, product.profiles?.nome, ...(product.tags || [])].join(' ').toLowerCase().includes(term)
     const matchesCategory = !filters?.category || filters.category === 'Todos' || product.categoria === filters.category
-
     return matchesSearch && matchesCategory
   })
-
-  return filtered.sort((left, right) => {
-    if (filters?.sort === 'Menor preÃ§o') return (left.preco || 0) - (right.preco || 0)
-    if (filters?.sort === 'Maior preÃ§o') return (right.preco || 0) - (left.preco || 0)
-    return new Date(right.created_at || 0).getTime() - new Date(left.created_at || 0).getTime()
+  return filtered.sort((a, b) => {
+    if (filters?.sort === 'Menor preço') return (a.preco || 0) - (b.preco || 0)
+    if (filters?.sort === 'Maior preço') return (b.preco || 0) - (a.preco || 0)
+    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
   })
 }
 
 function normalizeImageUrls(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value.filter((item): item is string => typeof item === 'string' && item.length > 0)
-  }
-
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === 'string' && item.length > 0)
   if (typeof value === 'string' && value.trim()) {
     const trimmed = value.trim()
-
     if (trimmed.startsWith('[')) {
       try {
         const parsed = JSON.parse(trimmed)
-        if (Array.isArray(parsed)) {
-          return parsed.filter((item): item is string => typeof item === 'string' && item.length > 0)
-        }
-      } catch {
-        // Fallback to treating the value as a single URL string.
-      }
+        if (Array.isArray(parsed)) return parsed.filter((item): item is string => typeof item === 'string')
+      } catch { /* fallback */ }
     }
-
     return [trimmed]
   }
-
   return []
 }
 
 function normalizeProduto<T extends Record<string, any>>(produto: T): T & { imagens_urls: string[]; imagem_url: string | null } {
   const imagens = normalizeImageUrls(produto.imagens_urls ?? produto.imagem_url)
-  return {
-    ...produto,
-    imagens_urls: imagens,
-    imagem_url: imagens[0] || null,
-  }
+  return { ...produto, imagens_urls: imagens, imagem_url: imagens[0] || null }
 }
 
 // ─────────────────────────────────────────
 // VAGAS
 // ─────────────────────────────────────────
 
-export async function getVagas(filters?: {
-  search?: string
-  category?: string
-  location?: string
-  type?: string
-}) {
+export async function getVagas(filters?: { search?: string; category?: string; location?: string; type?: string }) {
   let query = supabase
     .from('vagas')
     .select(`*, profiles(nome, avatar_url)`)
     .eq('activa', true)
     .order('created_at', { ascending: false })
 
-  if (filters?.search) {
-    query = query.or(`titulo.ilike.%${filters.search}%,empresa_nome.ilike.%${filters.search}%`)
-  }
-  if (filters?.category && filters.category !== 'Todas') {
-    query = query.eq('categoria', filters.category)
-  }
-  if (filters?.location && filters.location !== 'Todas') {
-    query = query.eq('localizacao', filters.location)
-  }
-  if (filters?.type && filters.type !== 'Todos') {
-    query = query.eq('tipo', filters.type)
-  }
+  if (filters?.search) query = query.or(`titulo.ilike.%${filters.search}%,empresa_nome.ilike.%${filters.search}%`)
+  if (filters?.category && filters.category !== 'Todas') query = query.eq('categoria', filters.category)
+  if (filters?.location && filters.location !== 'Todas') query = query.eq('localizacao', filters.location)
+  if (filters?.type && filters.type !== 'Todos') query = query.eq('tipo', filters.type)
 
   const { data, error } = await query
-  if (error) {
-    return filterDemoJobs(filters)
-  }
+  if (error) return filterDemoJobs(filters)
 
-  return mergeWithDemo(data || [], filterDemoJobs(filters), 6)
+  return mergeWithDemo(data || [], filterDemoJobs(filters) as any[], 6)
 }
 
 export async function getVagaById(id: string) {
@@ -296,42 +219,12 @@ export async function getVagaById(id: string) {
 }
 
 export async function createVaga(vaga: {
-  empresa_id: string
-  titulo: string
-  empresa_nome: string
-  localizacao: string
-  tipo: string
-  categoria: string
-  salario_min?: number
-  salario_max?: number
-  descricao?: string
-  responsabilidades?: string[]
-  requisitos?: string[]
-  beneficios?: string[]
-  skills?: string[]
-  prazo?: string
+  empresa_id: string; titulo: string; empresa_nome: string; localizacao: string;
+  tipo: string; categoria: string; salario_min?: number; salario_max?: number;
+  descricao?: string; responsabilidades?: string[]; requisitos?: string[];
+  beneficios?: string[]; skills?: string[]; prazo?: string;
 }) {
-  const { data, error } = await supabase.from('vagas').insert(vaga).select().single()
-  if (error) throw error
-  return data
-}
-
-export async function updateVaga(id: string, updates: {
-  titulo?: string
-  empresa_nome?: string
-  localizacao?: string
-  tipo?: string
-  categoria?: string
-  salario_min?: number
-  salario_max?: number
-  descricao?: string
-  responsabilidades?: string[]
-  requisitos?: string[]
-  beneficios?: string[]
-  skills?: string[]
-  prazo?: string
-}) {
-  const { data, error } = await supabase.from('vagas').update(updates).eq('id', id).select().single()
+  const { data, error } = await supabase.from('vagas').insert({ ...vaga, activa: true }).select().single()
   if (error) throw error
   return data
 }
@@ -341,23 +234,24 @@ export async function deleteVaga(id: string) {
   if (error) throw error
 }
 
+export async function updateVaga(id: string, updates: {
+  titulo?: string; empresa_nome?: string; localizacao?: string; tipo?: string;
+  categoria?: string; salario_min?: number; salario_max?: number; descricao?: string;
+  responsabilidades?: string[]; requisitos?: string[]; beneficios?: string[]; skills?: string[]; prazo?: string;
+}) {
+  const { data, error } = await supabase.from('vagas').update(updates).eq('id', id).select().single()
+  if (error) throw error
+  return data
+}
+
 // ─────────────────────────────────────────
 // CANDIDATURAS
 // ─────────────────────────────────────────
 
 export async function createCandidatura(candidatura: {
-  vaga_id: string
-  candidato_id: string
-  nome: string
-  email: string
-  telefone?: string
-  carta?: string
+  vaga_id: string; candidato_id: string; nome: string; email: string; telefone?: string; carta?: string;
 }) {
-  const { data, error } = await supabase
-    .from('candidaturas')
-    .insert(candidatura)
-    .select()
-    .single()
+  const { data, error } = await supabase.from('candidaturas').insert(candidatura).select().single()
   if (error) throw error
   return data
 }
@@ -383,20 +277,13 @@ export async function getCandidaturasByVaga(vaga_id: string) {
 }
 
 export async function updateCandidaturaStatus(id: string, status: string) {
-  const { error } = await supabase
-    .from('candidaturas')
-    .update({ status })
-    .eq('id', id)
+  const { error } = await supabase.from('candidaturas').update({ status }).eq('id', id)
   if (error) throw error
 }
 
 export async function checkJaCandidatou(vaga_id: string, candidato_id: string) {
   const { data } = await supabase
-    .from('candidaturas')
-    .select('id')
-    .eq('vaga_id', vaga_id)
-    .eq('candidato_id', candidato_id)
-    .maybeSingle()
+    .from('candidaturas').select('id').eq('vaga_id', vaga_id).eq('candidato_id', candidato_id).maybeSingle()
   return !!data
 }
 
@@ -404,41 +291,28 @@ export async function checkJaCandidatou(vaga_id: string, candidato_id: string) {
 // PRODUTOS
 // ─────────────────────────────────────────
 
-export async function getProdutos(filters?: {
-  search?: string
-  category?: string
-  sort?: string
-}) {
+export async function getProdutos(filters?: { search?: string; category?: string; sort?: string }) {
   let query = supabase
     .from('produtos')
     .select(`*, profiles(nome, avatar_url, localizacao)`)
-    .eq('activo', true)
+    .or('activo.eq.true,activo.is.null')
 
-  if (filters?.search) {
-    query = query.or(`titulo.ilike.%${filters.search}%`)
-  }
-  if (filters?.category && filters.category !== 'Todos') {
-    query = query.eq('categoria', filters.category)
-  }
+  if (filters?.search) query = query.or(`titulo.ilike.%${filters.search}%`)
+  if (filters?.category && filters.category !== 'Todos') query = query.eq('categoria', filters.category)
 
-  if (filters?.sort === 'Menor preço') {
-    query = query.order('preco', { ascending: true })
-  } else if (filters?.sort === 'Maior preço') {
-    query = query.order('preco', { ascending: false })
-  } else {
-    query = query.order('created_at', { ascending: false })
-  }
+  if (filters?.sort === 'Menor preço') query = query.order('preco', { ascending: true })
+  else if (filters?.sort === 'Maior preço') query = query.order('preco', { ascending: false })
+  else query = query.order('created_at', { ascending: false })
 
   const { data, error } = await query
-  if (error) {
-    return filterDemoProducts(filters).map(normalizeProduto)
-  }
+  if (error) return filterDemoProducts(filters).map(normalizeProduto)
 
-  return mergeWithDemo((data || []).map(normalizeProduto), filterDemoProducts(filters).map(normalizeProduto), 6)
+  const real = (data || []).map(normalizeProduto)
+  return mergeWithDemo(real, filterDemoProducts(filters).map(normalizeProduto) as any[], 6)
 }
 
 export async function getProdutoById(id: string) {
-  const demoProduct = DEMO_PRODUCTS.find((product) => product.id === id)
+  const demoProduct = DEMO_PRODUCTS.find((p) => p.id === id)
   if (demoProduct) return normalizeProduto(demoProduct)
 
   const { data, error } = await supabase
@@ -451,19 +325,21 @@ export async function getProdutoById(id: string) {
 }
 
 export async function createProduto(produto: {
-  vendedor_id: string
-  titulo: string
-  descricao?: string
-  preco: number
-  categoria: string
-  tags?: string[]
-  dias_entrega?: number
-  revisoes?: number
-  imagens_urls?: string[]
+  vendedor_id: string; titulo: string; descricao?: string; preco: number;
+  categoria: string; tags?: string[]; dias_entrega?: number; revisoes?: number;
+  imagem_url?: string; imagens_urls?: string[];
 }) {
-  const { data, error } = await supabase.from('produtos').insert({ ...produto, activo: true }).select().single()
+  const { data, error } = await supabase
+    .from('produtos')
+    .insert({ ...produto, activo: true })
+    .select().single()
   if (error) throw error
   return data
+}
+
+export async function deleteProduto(id: string) {
+  const { error } = await supabase.from('produtos').delete().eq('id', id)
+  if (error) throw error
 }
 
 // ─────────────────────────────────────────
@@ -471,43 +347,26 @@ export async function createProduto(produto: {
 // ─────────────────────────────────────────
 
 export async function getProfile(id: string) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', id)
-    .single()
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', id).single()
+  if (error) throw error
+  return data
+}
+
+export async function updateProfile(id: string, updates: {
+  nome?: string; titulo?: string; localizacao?: string; bio?: string;
+  website?: string; telefone?: string; avatar_url?: string;
+}) {
+  const { data, error } = await supabase.from('profiles').update(updates).eq('id', id).select().single()
   if (error) throw error
   return data
 }
 
 export async function getSuggestedProfiles(user_id: string) {
   const { data, error } = await supabase
-    .from('profiles')
-    .select('id, nome, titulo, avatar_url, localizacao')
-    .neq('id', user_id)
-    .limit(10)
-    .order('created_at', { ascending: false })
+    .from('profiles').select('id, nome, titulo, avatar_url, localizacao, role')
+    .neq('id', user_id).limit(5).order('created_at', { ascending: false })
   if (error) throw error
   return data || []
-}
-
-export async function updateProfile(id: string, updates: {
-  nome?: string
-  titulo?: string
-  localizacao?: string
-  bio?: string
-  website?: string
-  telefone?: string
-  avatar_url?: string
-}) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single()
-  if (error) throw error
-  return data
 }
 
 // ─────────────────────────────────────────
@@ -517,11 +376,7 @@ export async function updateProfile(id: string, updates: {
 export async function getConversations(user_id: string) {
   const { data, error } = await supabase
     .from('mensagens')
-    .select(`
-      *,
-      de: de_id(id, nome, avatar_url, titulo),
-      para: para_id(id, nome, avatar_url, titulo)
-    `)
+    .select(`*, de: de_id(id, nome, avatar_url, titulo), para: para_id(id, nome, avatar_url, titulo)`)
     .or(`de_id.eq.${user_id},para_id.eq.${user_id}`)
     .order('created_at', { ascending: false })
   if (error) throw error
@@ -530,31 +385,21 @@ export async function getConversations(user_id: string) {
 
 export async function getMensagens(user_id: string, other_id: string) {
   const { data, error } = await supabase
-    .from('mensagens')
-    .select('*')
-    .or(
-      `and(de_id.eq.${user_id},para_id.eq.${other_id}),and(de_id.eq.${other_id},para_id.eq.${user_id})`
-    )
+    .from('mensagens').select('*')
+    .or(`and(de_id.eq.${user_id},para_id.eq.${other_id}),and(de_id.eq.${other_id},para_id.eq.${user_id})`)
     .order('created_at', { ascending: true })
   if (error) throw error
   return data || []
 }
 
 export async function sendMensagem(de_id: string, para_id: string, texto: string) {
-  const { data, error } = await supabase
-    .from('mensagens')
-    .insert({ de_id, para_id, texto })
-    .select()
-    .single()
+  const { data, error } = await supabase.from('mensagens').insert({ de_id, para_id, texto }).select().single()
   if (error) throw error
   return data
 }
 
 export async function marcarLida(id: string) {
-  const { error } = await supabase
-    .from('mensagens')
-    .update({ lida: true })
-    .eq('id', id)
+  const { error } = await supabase.from('mensagens').update({ lida: true }).eq('id', id)
   if (error) throw error
 }
 
@@ -573,16 +418,9 @@ export async function getAvaliacoes(avaliado_id: string) {
 }
 
 export async function createAvaliacao(avaliacao: {
-  avaliado_id: string
-  avaliador_id: string
-  rating: number
-  comentario?: string
+  avaliado_id: string; avaliador_id: string; rating: number; comentario?: string;
 }) {
-  const { data, error } = await supabase
-    .from('avaliacoes')
-    .insert(avaliacao)
-    .select()
-    .single()
+  const { data, error } = await supabase.from('avaliacoes').insert(avaliacao).select().single()
   if (error) throw error
   return data
 }
@@ -609,29 +447,53 @@ export async function getDashboardStats(user_id: string) {
   }
 }
 
+// ─────────────────────────────────────────
+// FEED / POSTS
+// ─────────────────────────────────────────
+
+export async function getFeedPosts() {
+  const { data, error } = await supabase
+    .from('posts').select(`*, profiles(id, nome, avatar_url, titulo, localizacao)`)
+    .order('created_at', { ascending: false }).limit(20)
+  if (error) throw error
+  return data || []
+}
+
+export async function getSuggestedProfilesFeed(user_id: string) {
+  const { data, error } = await supabase
+    .from('profiles').select('id, nome, avatar_url, titulo, localizacao, role')
+    .neq('id', user_id).limit(5)
+  if (error) throw error
+  return data || []
+}
+
+// ─────────────────────────────────────────
+// PLATFORM STATS (Admin)
+// ─────────────────────────────────────────
+
 export async function getPlatformStats() {
   const now = new Date()
   const last30Days = new Date(now)
   last30Days.setDate(now.getDate() - 30)
   const recentIso = last30Days.toISOString()
 
-  const [profiles, newProfiles, companies, activeJobs, activeProducts, posts, messages] = await Promise.all([
+  const [profiles, newProfiles, activeJobs, activeProducts, posts, messages, candidaturas] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', recentIso),
-    supabase.from('companies').select('id', { count: 'exact', head: true }),
     supabase.from('vagas').select('id', { count: 'exact', head: true }).eq('activa', true),
-    supabase.from('produtos').select('id', { count: 'exact', head: true }).eq('activo', true),
+    supabase.from('produtos').select('id', { count: 'exact', head: true }).or('activo.eq.true,activo.is.null'),
     supabase.from('posts').select('id', { count: 'exact', head: true }),
     supabase.from('mensagens').select('id', { count: 'exact', head: true }),
+    supabase.from('candidaturas').select('id', { count: 'exact', head: true }),
   ])
 
   return {
     totalUsers: profiles.count || 0,
     newUsersLast30Days: newProfiles.count || 0,
-    totalCompanies: companies.count || 0,
     activeJobs: activeJobs.count || 0,
     activeProducts: activeProducts.count || 0,
     totalPosts: posts.count || 0,
     totalMessages: messages.count || 0,
+    totalCandidaturas: candidaturas.count || 0,
   }
 }
