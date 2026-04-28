@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import {
   Users, Briefcase, ShoppingBag, MessageCircle, TrendingUp,
   CheckCircle, XCircle, Eye, Trash2, Shield, AlertTriangle,
@@ -11,7 +11,7 @@ import { useAuth } from "../context/AuthContext";
 const B = "#1A6BB5", BD = "#0D3B6E", BDK = "#0A2540", BL = "#E8F3FC", GOLD = "#F5A623";
 
 // ⚠️ Muda este email para o teu email de administrador
-const ADMIN_EMAIL = "mabolacha58@gmail.com";
+const ADMIN_EMAIL = "mateus@drielle.co.mz";
 
 type Tab = "overview" | "usuarios" | "vagas" | "produtos" | "candidaturas";
 
@@ -54,13 +54,10 @@ export function Admin() {
         supabase.from("produtos").select("id", { count: "exact" }),
         supabase.from("candidaturas").select("id", { count: "exact" }),
         supabase.from("mensagens").select("id", { count: "exact" }),
-        supabase.from("profiles").select("id,nome,email,role,avatar_url,localizacao,created_at").order("created_at", { ascending: false }).limit(50),
-        supabase.from("vagas").select("id,titulo,empresa_nome,localizacao,tipo,created_at,profiles(nome,email)").order("created_at", { ascending: false }).limit(50),
-        supabase.from("produtos").select("id,titulo,categoria,preco,imagem_url,imagens_urls,created_at,profiles(nome,email)").order("created_at", { ascending: false }).limit(50),
-        supabase.from("candidaturas")
-          .select("*, vagas!candidaturas_vaga_id_fkey(titulo, empresa_nome), profiles(nome, email)")
-          .order("created_at", { ascending: false })
-          .limit(50),
+        supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(50),
+        supabase.from("vagas").select("*, profiles(nome, email)").order("created_at", { ascending: false }).limit(50),
+        supabase.from("produtos").select("*, profiles(nome, email)").order("created_at", { ascending: false }).limit(50),
+        supabase.from("candidaturas").select("*, vagas(titulo, empresa_nome), profiles(nome, email)").order("created_at", { ascending: false }).limit(50),
       ]);
 
       setStats({ users: userCount || 0, vagas: vagaCount || 0, produtos: prodCount || 0, candidaturas: candCount || 0, mensagens: msgCount || 0 });
@@ -91,12 +88,24 @@ export function Admin() {
   }
 
   async function deleteUsuario(id: string) {
-    if (!confirm("Tens a certeza? Esta acção é irreversível.")) return;
+    if (!confirm("Tens a certeza? Esta acção apaga o utilizador completamente e é irreversível.")) return;
     setActionLoading(id);
-    await supabase.from("profiles").delete().eq("id", id);
-    setUsuarios(u => u.filter(x => x.id !== id));
-    setStats(s => ({ ...s, users: s.users - 1 }));
-    setActionLoading(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke('delete-user', {
+        body: { user_id: id },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error) throw res.error;
+      setUsuarios(u => u.filter(x => x.id !== id));
+      setStats(s => ({ ...s, users: s.users - 1 }));
+      alert("Utilizador apagado com sucesso!");
+    } catch (e: any) {
+      alert("Erro ao apagar: " + (e.message || "Tenta novamente"));
+      console.error(e);
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function updateCandidaturaStatus(id: string, status: string) {
@@ -371,7 +380,7 @@ export function Admin() {
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
                       <tr style={{ background: "#F8F9FA" }}>
-                        {["Produto", "Categoria", "Preço", "Imagens", "Vendedor", "Data", "Acções"].map(h => (
+                        {["Produto", "Categoria", "Preço", "Vendedor", "Data", "Acções"].map(h => (
                           <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "#6C757D", textTransform: "uppercase", letterSpacing: "0.5px", whiteSpace: "nowrap" }}>{h}</th>
                         ))}
                       </tr>
@@ -385,7 +394,7 @@ export function Admin() {
                           <td style={{ padding: "12px 16px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                               {p.imagem_url ? (
-                                <img src={p.imagem_url} alt={p.titulo} style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", objectPosition: "center" }} />
+                                <img src={p.imagem_url} alt={p.titulo} style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover" }} />
                               ) : (
                                 <div style={{ width: 36, height: 36, borderRadius: 8, background: BL, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                   <ShoppingBag size={16} color={B} />
@@ -398,9 +407,6 @@ export function Admin() {
                             <span style={{ fontSize: 11, padding: "3px 9px", borderRadius: 99, background: "#FEF3DC", color: "#92400E", fontWeight: 600 }}>{p.categoria}</span>
                           </td>
                           <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 700, color: B }}>{p.preco?.toLocaleString("pt-MZ")} MZN</td>
-                          <td style={{ padding: "12px 16px", fontSize: 12, color: "#6C757D" }}>
-                            {p.imagens_urls ? `${p.imagens_urls.length} imagem${p.imagens_urls.length !== 1 ? 's' : ''}` : '0 imagens'}
-                          </td>
                           <td style={{ padding: "12px 16px", fontSize: 13, color: "#6C757D" }}>{p.profiles?.nome || "—"}</td>
                           <td style={{ padding: "12px 16px", fontSize: 12, color: "#ADB5BD" }}>{new Date(p.created_at).toLocaleDateString("pt-PT")}</td>
                           <td style={{ padding: "12px 16px" }}>
