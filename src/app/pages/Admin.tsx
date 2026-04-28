@@ -385,7 +385,7 @@ export function Admin() {
                           <td style={{ padding: "12px 16px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                               {p.imagem_url ? (
-                                <img src={p.imagem_url} alt={p.titulo} style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover" }} />
+                                <img src={p.imagem_url} alt={p.titulo} style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", objectPosition: "center" }} />
                               ) : (
                                 <div style={{ width: 36, height: 36, borderRadius: 8, background: BL, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                   <ShoppingBag size={16} color={B} />

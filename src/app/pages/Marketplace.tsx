@@ -793,7 +793,7 @@ function ProductCard({
 
       <div style={{ height: 164, position: "relative", background: `linear-gradient(135deg, ${color}22, ${color}50)` }}>
         {product.imagens_urls?.[0] ? (
-          <img src={product.imagens_urls[0]} alt={product.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={product.imagens_urls[0]} alt={product.titulo} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
         ) : (
           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div

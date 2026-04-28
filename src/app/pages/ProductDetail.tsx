@@ -83,9 +83,9 @@ export function ProductDetail() {
           <div style={{ background: "white", border: "1px solid #E9ECEF", borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
             <div style={{ height: 280, overflow: "hidden", position: "relative" }}>
               {product.imagens_urls && product.imagens_urls.length > 0 ? (
-                <img src={product.imagens_urls[currentImageIndex]} alt={product.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={product.imagens_urls[currentImageIndex]} alt={product.titulo} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
               ) : product.imagem_url ? (
-                <img src={product.imagem_url} alt={product.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={product.imagem_url} alt={product.titulo} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
               ) : (
                 <div style={{ width: "100%", height: "100%", background: `linear-gradient(135deg,${color}15,${color}35)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ width: 80, height: 80, borderRadius: 20, background: color, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Sora',sans-serif", fontSize: 26, fontWeight: 800, color: "white", boxShadow: `0 8px 24px ${color}50` }}>

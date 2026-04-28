@@ -268,7 +268,7 @@ export function Dashboard() {
                   <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < meusProdutos.length - 1 ? "1px solid #F1F3F5" : "none" }}>
                     <div style={{ width: 38, height: 38, borderRadius: 10, overflow: "hidden", flexShrink: 0 }}>
                       {p.imagem_url
-                        ? <img src={p.imagem_url} alt={p.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ? <img src={p.imagem_url} alt={p.titulo} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
                         : <div style={{ width: "100%", height: "100%", background: "#FEF3DC", display: "flex", alignItems: "center", justifyContent: "center" }}><ShoppingBag size={16} color="#D97706" /></div>
                       }
                     </div>
