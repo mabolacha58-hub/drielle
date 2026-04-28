@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Users, Briefcase, ShoppingBag, MessageCircle, TrendingUp,
   CheckCircle, XCircle, Eye, Trash2, Shield, AlertTriangle,
