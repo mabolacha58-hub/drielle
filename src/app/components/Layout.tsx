@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { Notifications } from "./Notifications";
 import { MobileNav } from "./MobileNav";
 import { useAuth } from "../context/AuthContext";
-import { AuthProvider } from "../context/AuthContext";
 
 const B = "#1A6BB5", BD = "#0D3B6E", BL = "#E8F3FC", GOLD = "#F5A623";
 
@@ -17,7 +16,7 @@ const NAV = [
   { to: "/dashboard",   label: "Dashboard", icon: LayoutDashboard },
 ];
 
-function LayoutInner() {
+export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { profile, user, signOut } = useAuth();
@@ -269,13 +268,5 @@ function LayoutInner() {
         }
       `}</style>
     </div>
-  );
-}
-
-export function Layout() {
-  return (
-    <AuthProvider>
-      <LayoutInner />
-    </AuthProvider>
   );
 }
