@@ -127,6 +127,75 @@ const DEMO_JOBS = [
   },
 ]
 
+const DEMO_POSTS = [
+  {
+    id: 'demo-post-1',
+    autor_id: 'demo-seller-1',
+    tipo: 'post',
+    texto: 'Acaba de chegar nova colecção de laptops profissionais! 🚀 Ideais para desenvolvimento, design e trabalho remoto. Promoção especial para os primeiros 20 clientes com desconto de 15%! 💻',
+    created_at: '2026-04-27T14:30:00.000Z',
+    likes: 24,
+    comments: 5,
+    liked: false,
+    profiles: { id: 'demo-seller-1', nome: 'Tech Store Maputo', titulo: 'Loja de Tecnologia', localizacao: 'Maputo', avatar_url: null },
+  },
+  {
+    id: 'demo-post-2',
+    autor_id: 'demo-seller-2',
+    tipo: 'vaga',
+    texto: 'Estamos a reforçar a equipa! 🌟 Procuramos: ✓ Assistente Administrativo (2 vagas)\n✓ Técnico de Suporte Informático (1 vaga)\n✓ Analista Financeiro (1 vaga)\n\nBenefícios: Seguro, Formação, Crescimento Profissional. Candidatos até 20/05/2026.',
+    created_at: '2026-04-26T10:15:00.000Z',
+    likes: 42,
+    comments: 12,
+    liked: false,
+    profiles: { id: 'demo-company-1', nome: 'Grupo Horizonte', titulo: 'Empresa Multinacional', localizacao: 'Maputo', avatar_url: null },
+  },
+  {
+    id: 'demo-post-3',
+    autor_id: 'demo-seller-3',
+    tipo: 'produto',
+    texto: 'Lançamento exclusivo! 🎨 Pacote de Branding Completo agora com 20% de desconto. Inclui:\n🔹 Logo profissional\n🔹 Paleta de cores customizada\n🔹 Templates para redes sociais\n🔹 Guia de marca mini\n\nApenas 5 vagas disponíveis neste mês!',
+    created_at: '2026-04-25T16:45:00.000Z',
+    likes: 38,
+    comments: 8,
+    liked: false,
+    profiles: { id: 'demo-seller-3', nome: 'Studio Criativo 258', titulo: 'Agência Criativa', localizacao: 'Nampula', avatar_url: null },
+  },
+  {
+    id: 'demo-post-4',
+    autor_id: 'demo-seller-2',
+    tipo: 'post',
+    texto: 'Dica de negócio! 💡 A organização fiscal é essencial para o sucesso da sua PME. Uma consultoria adequada pode economizar até 30% em impostos. Agenda uma sessão connosco e descobre como otimizar o teu negócio! 📊',
+    created_at: '2026-04-24T09:20:00.000Z',
+    likes: 15,
+    comments: 3,
+    liked: false,
+    profiles: { id: 'demo-seller-2', nome: 'Moz Finance Advisory', titulo: 'Consultoria Fiscal', localizacao: 'Beira', avatar_url: null },
+  },
+  {
+    id: 'demo-post-5',
+    autor_id: 'demo-seller-1',
+    tipo: 'post',
+    texto: 'Cliente satisfeito! 😊 Acabamos de entregar 15 laptops para a empresa XYZ Solutions. Configuração custom, suporte técnico incluído e garantia de 2 anos. Obrigado pela confiança! 🙏',
+    created_at: '2026-04-23T13:50:00.000Z',
+    likes: 56,
+    comments: 14,
+    liked: false,
+    profiles: { id: 'demo-seller-1', nome: 'Tech Store Maputo', titulo: 'Loja de Tecnologia', localizacao: 'Maputo', avatar_url: null },
+  },
+  {
+    id: 'demo-post-6',
+    autor_id: 'demo-company-2',
+    tipo: 'vaga',
+    texto: 'A Inova Tech está a crescer! 🚀 Procuramos Técnico de Suporte Informático para o nosso escritório em Beira. Oferecemos modelo híbrido, formação contínua e oportunidades de carreira. Junta-te à nossa equipa! 💪',
+    created_at: '2026-04-22T11:30:00.000Z',
+    likes: 27,
+    comments: 9,
+    liked: false,
+    profiles: { id: 'demo-company-2', nome: 'Inova Tech', titulo: 'Empresa de TI', localizacao: 'Beira', avatar_url: null },
+  },
+]
+
 function mergeWithDemo<T extends { id: string }>(realItems: T[], demoItems: T[], minimum: number) {
   if (realItems.length >= minimum) return realItems
   const realIds = new Set(realItems.map((item) => item.id))
@@ -178,44 +247,9 @@ function normalizeImageUrls(value: unknown): string[] {
   return []
 }
 
-// ─────────────────────────────────────────
-// CORRECÇÃO PRINCIPAL
-// O Supabase com .select('*, profiles(...)') pode retornar o perfil
-// de duas formas diferentes:
-//   1. Aninhado:  { profiles: { nome, avatar_url, localizacao } }
-//   2. Flat:      { nome, avatar_url, localizacao }  (sem o objecto profiles)
-//
-// Esta função normaliza os dois casos para garantir que
-// produto.profiles.nome funciona sempre no componente.
-// ─────────────────────────────────────────
-function normalizeProduto<T extends Record<string, any>>(produto: T): T & {
-  imagens_urls: string[]
-  imagem_url: string | null
-  profiles: { nome?: string; avatar_url?: string; localizacao?: string }
-} {
+function normalizeProduto<T extends Record<string, any>>(produto: T): T & { imagens_urls: string[]; imagem_url: string | null } {
   const imagens = normalizeImageUrls(produto.imagens_urls ?? produto.imagem_url)
-
-  // Se já vem aninhado e com dados, usa directamente
-  const profilesAninhado =
-    produto.profiles &&
-    typeof produto.profiles === 'object' &&
-    !Array.isArray(produto.profiles)
-      ? produto.profiles
-      : null
-
-  // Caso contrário, constrói o objecto a partir das colunas flat
-  const profiles = profilesAninhado ?? {
-    nome: produto.nome ?? null,
-    avatar_url: produto.avatar_url ?? null,
-    localizacao: produto.localizacao ?? null,
-  }
-
-  return {
-    ...produto,
-    imagens_urls: imagens,
-    imagem_url: imagens[0] || null,
-    profiles,
-  }
+  return { ...produto, imagens_urls: imagens, imagem_url: imagens[0] || null }
 }
 
 // ─────────────────────────────────────────
@@ -254,10 +288,10 @@ export async function getVagaById(id: string) {
 }
 
 export async function createVaga(vaga: {
-  empresa_id: string; titulo: string; empresa_nome: string; localizacao: string
-  tipo: string; categoria: string; salario_min?: number; salario_max?: number
-  descricao?: string; responsabilidades?: string[]; requisitos?: string[]
-  beneficios?: string[]; skills?: string[]; prazo?: string
+  empresa_id: string; titulo: string; empresa_nome: string; localizacao: string;
+  tipo: string; categoria: string; salario_min?: number; salario_max?: number;
+  descricao?: string; responsabilidades?: string[]; requisitos?: string[];
+  beneficios?: string[]; skills?: string[]; prazo?: string;
 }) {
   const { data, error } = await supabase.from('vagas').insert({ ...vaga, activa: true }).select().single()
   if (error) throw error
@@ -270,13 +304,28 @@ export async function deleteVaga(id: string) {
 }
 
 export async function updateVaga(id: string, updates: {
-  titulo?: string; empresa_nome?: string; localizacao?: string; tipo?: string
-  categoria?: string; salario_min?: number; salario_max?: number; descricao?: string
-  responsabilidades?: string[]; requisitos?: string[]; beneficios?: string[]; skills?: string[]; prazo?: string
+  titulo?: string; empresa_nome?: string; localizacao?: string; tipo?: string;
+  categoria?: string; salario_min?: number; salario_max?: number; descricao?: string;
+  responsabilidades?: string[]; requisitos?: string[]; beneficios?: string[]; skills?: string[]; prazo?: string;
 }) {
   const { data, error } = await supabase.from('vagas').update(updates).eq('id', id).select().single()
   if (error) throw error
   return data
+}
+
+export async function checkVagaDuplicate(empresa_id: string, titulo: string) {
+  const { data, error } = await supabase
+    .from('vagas')
+    .select('id, titulo')
+    .eq('empresa_id', empresa_id)
+    .eq('activa', true)
+  if (error) throw error
+  if (!data) return null
+  
+  const tituloNormalizado = titulo.toLowerCase().trim()
+  const duplicado = data.find(v => v.titulo.toLowerCase().trim() === tituloNormalizado)
+  
+  return duplicado || null
 }
 
 // ─────────────────────────────────────────
@@ -284,7 +333,7 @@ export async function updateVaga(id: string, updates: {
 // ─────────────────────────────────────────
 
 export async function createCandidatura(candidatura: {
-  vaga_id: string; candidato_id: string; nome: string; email: string; telefone?: string; carta?: string
+  vaga_id: string; candidato_id: string; nome: string; email: string; telefone?: string; carta?: string;
 }) {
   const { data, error } = await supabase.from('candidaturas').insert(candidatura).select().single()
   if (error) throw error
@@ -340,14 +389,7 @@ export async function getProdutos(filters?: { search?: string; category?: string
   else query = query.order('created_at', { ascending: false })
 
   const { data, error } = await query
-
-  // Log para debug — podes remover depois de confirmar que funciona
-  if (error) {
-    console.error('[getProdutos] Erro Supabase:', error)
-    return filterDemoProducts(filters).map(normalizeProduto)
-  }
-
-  console.log('[getProdutos] Produtos reais recebidos:', data?.length ?? 0)
+  if (error) return filterDemoProducts(filters).map(normalizeProduto)
 
   const real = (data || []).map(normalizeProduto)
   return mergeWithDemo(real, filterDemoProducts(filters).map(normalizeProduto) as any[], 6)
@@ -367,9 +409,9 @@ export async function getProdutoById(id: string) {
 }
 
 export async function createProduto(produto: {
-  vendedor_id: string; titulo: string; descricao?: string; preco: number
-  categoria: string; tags?: string[]; dias_entrega?: number; revisoes?: number
-  imagem_url?: string; imagens_urls?: string[]
+  vendedor_id: string; titulo: string; descricao?: string; preco: number;
+  categoria: string; tags?: string[]; dias_entrega?: number; revisoes?: number;
+  imagem_url?: string; imagens_urls?: string[];
 }) {
   const { data, error } = await supabase
     .from('produtos')
@@ -379,9 +421,45 @@ export async function createProduto(produto: {
   return data
 }
 
+export async function checkProdutoDuplicate(vendedor_id: string, titulo: string) {
+  const { data, error } = await supabase
+    .from('produtos')
+    .select('id, titulo')
+    .eq('vendedor_id', vendedor_id)
+    .eq('activo', true)
+  if (error) throw error
+  if (!data) return null
+  
+  const tituloNormalizado = titulo.toLowerCase().trim()
+  const duplicado = data.find(p => p.titulo.toLowerCase().trim() === tituloNormalizado)
+  
+  return duplicado || null
+}
+
 export async function deleteProduto(id: string) {
   const { error } = await supabase.from('produtos').delete().eq('id', id)
   if (error) throw error
+}
+
+// ─────────────────────────────────────────
+// POSTS (FEED)
+// ─────────────────────────────────────────
+
+export async function getPosts() {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*, profiles(id, nome, titulo, localizacao, avatar_url)')
+      .order('created_at', { ascending: false })
+      .limit(30)
+    if (error) throw error
+    if (data && data.length > 0) {
+      return data
+    }
+  } catch (e) {
+    console.error('Erro ao carregar posts:', e)
+  }
+  return DEMO_POSTS
 }
 
 // ─────────────────────────────────────────
@@ -395,8 +473,8 @@ export async function getProfile(id: string) {
 }
 
 export async function updateProfile(id: string, updates: {
-  nome?: string; titulo?: string; localizacao?: string; bio?: string
-  website?: string; telefone?: string; avatar_url?: string
+  nome?: string; titulo?: string; localizacao?: string; bio?: string;
+  website?: string; telefone?: string; avatar_url?: string;
 }) {
   const { data, error } = await supabase.from('profiles').update(updates).eq('id', id).select().single()
   if (error) throw error
@@ -460,7 +538,7 @@ export async function getAvaliacoes(avaliado_id: string) {
 }
 
 export async function createAvaliacao(avaliacao: {
-  avaliado_id: string; avaliador_id: string; rating: number; comentario?: string
+  avaliado_id: string; avaliador_id: string; rating: number; comentario?: string;
 }) {
   const { data, error } = await supabase.from('avaliacoes').insert(avaliacao).select().single()
   if (error) throw error

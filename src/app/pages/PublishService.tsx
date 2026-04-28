@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { AlertCircle, ArrowLeft, CheckCircle, Plus, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../../lib/supabase";
+import { checkProdutoDuplicate } from "../../lib/api";
 
 const B = "#1A6BB5";
 const BD = "#0D3B6E";
@@ -97,6 +98,14 @@ export function PublishService() {
     setError("");
 
     try {
+      // Verificar se já existe um produto com o mesmo título deste vendedor
+      const duplicado = await checkProdutoDuplicate(user.id, form.titulo);
+      if (duplicado) {
+        setError(`Já publicaste um serviço com o título "${duplicado.titulo}". Escolhe um título diferente ou edita o serviço existente.`);
+        setLoading(false);
+        return;
+      }
+
       const imagens_urls: string[] = [];
 
       if (imageFiles.length > 0) {

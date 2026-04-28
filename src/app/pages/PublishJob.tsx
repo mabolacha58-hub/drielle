@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ArrowLeft, Plus, X, Briefcase, CheckCircle, AlertCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { createVaga, getVagaById, updateVaga } from "../../lib/api";
+import { createVaga, getVagaById, updateVaga, checkVagaDuplicate } from "../../lib/api";
 
 // Constantes de design (cores da marca)
 const B = "#1A6BB5";
@@ -257,6 +257,16 @@ export function PublishJob() {
     setError("");
 
     try {
+      // Se for modo criação (sem ID), verificar duplicatas
+      if (!id) {
+        const duplicado = await checkVagaDuplicate(empresaId, form.titulo);
+        if (duplicado) {
+          setError(`Já publicaste uma vaga com o título "${duplicado.titulo}". Escolhe um título diferente ou edita a vaga existente.`);
+          setLoading(false);
+          return;
+        }
+      }
+
       // Preparar payload
       const payload = {
         titulo: form.titulo,

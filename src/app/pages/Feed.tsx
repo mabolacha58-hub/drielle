@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Send, ThumbsUp, MessageCircle, Share2, MoreHorizontal, Bookmark, Briefcase, ShoppingBag, Globe, TrendingUp, UserPlus, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../../lib/supabase";
-import { getSuggestedProfiles, getVagas, getProdutos } from "../../lib/api";
+import { getSuggestedProfiles, getVagas, getProdutos, getPosts } from "../../lib/api";
 
 const B = "#1A6BB5", BD = "#0D3B6E", BDK = "#0A2540", BL = "#E8F3FC", GOLD = "#F5A623";
 const COLORS = ["#1A6BB5","#E24B4A","#0D3B6E","#D97706","#7C3AED","#059669","#DB2777","#0F766E"];
@@ -41,7 +41,7 @@ export function Feed() {
   const loadFeed = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await supabase.from("posts").select("*, profiles(id,nome,titulo,localizacao,avatar_url)").order("created_at",{ascending:false}).limit(30);
+      const data = await getPosts();
       const withMeta = await Promise.all((data||[]).map(async p => {
         const [{ count: likes }, { count: comments }, likedRow] = await Promise.all([
           supabase.from("post_likes").select("id",{count:"exact"}).eq("post_id",p.id),
