@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, Briefcase, Eye, MessageCircle, Star, ArrowUpRight, Plus, ArrowRight, Trash2, ShoppingBag, MapPin } from "lucide-react";
+import { TrendingUp, Briefcase, Eye, MessageCircle, Star, ArrowUpRight, Plus, ArrowRight, Trash2, ShoppingBag, MapPin, Shield } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { getDashboardStats, getMyCandidaturas, deleteVaga, deleteProduto } from "../../lib/api";
 import { supabase } from "../../lib/supabase";
@@ -87,6 +87,13 @@ export function Dashboard() {
                 <Plus size={14} /> Novo Serviço
               </button>
             </Link>
+            {user?.email === "mabolacha58@gmail.com" && (
+              <Link to="/admin" style={{ textDecoration: "none" }}>
+                <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", background: "rgba(245,166,35,0.2)", color: "#F5A623", border: "1px solid rgba(245,166,35,0.4)", borderRadius: 99, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                  <Shield size={14} /> Admin
+                </button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -268,7 +275,7 @@ export function Dashboard() {
                   <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < meusProdutos.length - 1 ? "1px solid #F1F3F5" : "none" }}>
                     <div style={{ width: 38, height: 38, borderRadius: 10, overflow: "hidden", flexShrink: 0 }}>
                       {p.imagem_url
-                        ? <img src={p.imagem_url} alt={p.titulo} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+                        ? <img src={p.imagem_url} alt={p.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         : <div style={{ width: "100%", height: "100%", background: "#FEF3DC", display: "flex", alignItems: "center", justifyContent: "center" }}><ShoppingBag size={16} color="#D97706" /></div>
                       }
                     </div>
