@@ -178,9 +178,44 @@ function normalizeImageUrls(value: unknown): string[] {
   return []
 }
 
-function normalizeProduto<T extends Record<string, any>>(produto: T): T & { imagens_urls: string[]; imagem_url: string | null } {
+// ─────────────────────────────────────────
+// CORRECÇÃO PRINCIPAL
+// O Supabase com .select('*, profiles(...)') pode retornar o perfil
+// de duas formas diferentes:
+//   1. Aninhado:  { profiles: { nome, avatar_url, localizacao } }
+//   2. Flat:      { nome, avatar_url, localizacao }  (sem o objecto profiles)
+//
+// Esta função normaliza os dois casos para garantir que
+// produto.profiles.nome funciona sempre no componente.
+// ─────────────────────────────────────────
+function normalizeProduto<T extends Record<string, any>>(produto: T): T & {
+  imagens_urls: string[]
+  imagem_url: string | null
+  profiles: { nome?: string; avatar_url?: string; localizacao?: string }
+} {
   const imagens = normalizeImageUrls(produto.imagens_urls ?? produto.imagem_url)
-  return { ...produto, imagens_urls: imagens, imagem_url: imagens[0] || null }
+
+  // Se já vem aninhado e com dados, usa directamente
+  const profilesAninhado =
+    produto.profiles &&
+    typeof produto.profiles === 'object' &&
+    !Array.isArray(produto.profiles)
+      ? produto.profiles
+      : null
+
+  // Caso contrário, constrói o objecto a partir das colunas flat
+  const profiles = profilesAninhado ?? {
+    nome: produto.nome ?? null,
+    avatar_url: produto.avatar_url ?? null,
+    localizacao: produto.localizacao ?? null,
+  }
+
+  return {
+    ...produto,
+    imagens_urls: imagens,
+    imagem_url: imagens[0] || null,
+    profiles,
+  }
 }
 
 // ─────────────────────────────────────────
@@ -219,10 +254,10 @@ export async function getVagaById(id: string) {
 }
 
 export async function createVaga(vaga: {
-  empresa_id: string; titulo: string; empresa_nome: string; localizacao: string;
-  tipo: string; categoria: string; salario_min?: number; salario_max?: number;
-  descricao?: string; responsabilidades?: string[]; requisitos?: string[];
-  beneficios?: string[]; skills?: string[]; prazo?: string;
+  empresa_id: string; titulo: string; empresa_nome: string; localizacao: string
+  tipo: string; categoria: string; salario_min?: number; salario_max?: number
+  descricao?: string; responsabilidades?: string[]; requisitos?: string[]
+  beneficios?: string[]; skills?: string[]; prazo?: string
 }) {
   const { data, error } = await supabase.from('vagas').insert({ ...vaga, activa: true }).select().single()
   if (error) throw error
@@ -235,9 +270,9 @@ export async function deleteVaga(id: string) {
 }
 
 export async function updateVaga(id: string, updates: {
-  titulo?: string; empresa_nome?: string; localizacao?: string; tipo?: string;
-  categoria?: string; salario_min?: number; salario_max?: number; descricao?: string;
-  responsabilidades?: string[]; requisitos?: string[]; beneficios?: string[]; skills?: string[]; prazo?: string;
+  titulo?: string; empresa_nome?: string; localizacao?: string; tipo?: string
+  categoria?: string; salario_min?: number; salario_max?: number; descricao?: string
+  responsabilidades?: string[]; requisitos?: string[]; beneficios?: string[]; skills?: string[]; prazo?: string
 }) {
   const { data, error } = await supabase.from('vagas').update(updates).eq('id', id).select().single()
   if (error) throw error
@@ -249,7 +284,7 @@ export async function updateVaga(id: string, updates: {
 // ─────────────────────────────────────────
 
 export async function createCandidatura(candidatura: {
-  vaga_id: string; candidato_id: string; nome: string; email: string; telefone?: string; carta?: string;
+  vaga_id: string; candidato_id: string; nome: string; email: string; telefone?: string; carta?: string
 }) {
   const { data, error } = await supabase.from('candidaturas').insert(candidatura).select().single()
   if (error) throw error
@@ -305,7 +340,14 @@ export async function getProdutos(filters?: { search?: string; category?: string
   else query = query.order('created_at', { ascending: false })
 
   const { data, error } = await query
-  if (error) return filterDemoProducts(filters).map(normalizeProduto)
+
+  // Log para debug — podes remover depois de confirmar que funciona
+  if (error) {
+    console.error('[getProdutos] Erro Supabase:', error)
+    return filterDemoProducts(filters).map(normalizeProduto)
+  }
+
+  console.log('[getProdutos] Produtos reais recebidos:', data?.length ?? 0)
 
   const real = (data || []).map(normalizeProduto)
   return mergeWithDemo(real, filterDemoProducts(filters).map(normalizeProduto) as any[], 6)
@@ -325,9 +367,9 @@ export async function getProdutoById(id: string) {
 }
 
 export async function createProduto(produto: {
-  vendedor_id: string; titulo: string; descricao?: string; preco: number;
-  categoria: string; tags?: string[]; dias_entrega?: number; revisoes?: number;
-  imagem_url?: string; imagens_urls?: string[];
+  vendedor_id: string; titulo: string; descricao?: string; preco: number
+  categoria: string; tags?: string[]; dias_entrega?: number; revisoes?: number
+  imagem_url?: string; imagens_urls?: string[]
 }) {
   const { data, error } = await supabase
     .from('produtos')
@@ -353,8 +395,8 @@ export async function getProfile(id: string) {
 }
 
 export async function updateProfile(id: string, updates: {
-  nome?: string; titulo?: string; localizacao?: string; bio?: string;
-  website?: string; telefone?: string; avatar_url?: string;
+  nome?: string; titulo?: string; localizacao?: string; bio?: string
+  website?: string; telefone?: string; avatar_url?: string
 }) {
   const { data, error } = await supabase.from('profiles').update(updates).eq('id', id).select().single()
   if (error) throw error
@@ -418,7 +460,7 @@ export async function getAvaliacoes(avaliado_id: string) {
 }
 
 export async function createAvaliacao(avaliacao: {
-  avaliado_id: string; avaliador_id: string; rating: number; comentario?: string;
+  avaliado_id: string; avaliador_id: string; rating: number; comentario?: string
 }) {
   const { data, error } = await supabase.from('avaliacoes').insert(avaliacao).select().single()
   if (error) throw error
