@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation, useNavigate } from "react-router";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, Menu, X, Home, Briefcase, ShoppingBag, MessageCircle, LayoutDashboard, User, ChevronDown, LogOut, Settings, Rss } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Notifications } from "./Notifications";
